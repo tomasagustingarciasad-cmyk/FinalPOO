@@ -1,0 +1,12 @@
+<section class="card">
+    <h3>Linear Move (G1)</h3>
+    <% if (error) { %><div class="error"><%= error %></div><% } %>
+    <% if (result) { %><div class="ok">Result: <pre><%= JSON.stringify(result, null, 2) %></pre></div><% } %>
+    <form method="post" action="/robot/move" class="form">
+        <label>X <input type="number" step="any" name="x" value="<%= last?.x ?? '' %>" required></label>
+        <label>Y <input type="number" step="any" name="y" value="<%= last?.y ?? '' %>" required></label>
+        <label>Z <input type="number" step="any" name="z" value="<%= last?.z ?? '' %>" required></label>
+        <label>Feed (F) <input type="number" step="any" name="feed" value="<%= last?.feed ?? '' %>"></label>
+        <button type="submit">Send</button>
+    </form>
+</section>
