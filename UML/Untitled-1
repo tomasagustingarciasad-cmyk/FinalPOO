@@ -1,0 +1,289 @@
+import React from "react";
+
+// === UML Global Diagram for the Integrador POO (Robot RRR) ===
+// Packages: Servidor (C++), Dominio Compartido, Cliente (Python)
+// Legend: Triángulo = Herencia, Rombo lleno = Composición, Rombo vacío = Agregación, Línea discontinua = Dependencia, Línea = Asociación
+
+export default function UMLIntegradorRRR() {
+  const W = 1500;
+  const H = 1100;
+
+  // Helper for colors
+  const colors = {
+    server: "#E8F0FE", // light blue
+    shared: "#E8F5E9", // light green
+    client: "#FFF3E0", // light orange
+    card: "#ffffff",
+    stroke: "#3f3f46",
+    text: "#111827",
+    label: "#374151",
+  } as const;
+
+  type Node = {
+    id: string;
+    label: string;
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    pkg: "server" | "shared" | "client";
+  };
+
+  const nodes: Node[] = [
+    // ===== Servidor (C++) =====
+    { id: "ServidorRPC", label: "ServidorRPC", x: 60, y: 120, w: 200, h: 70, pkg: "server" },
+    { id: "GestorUsuarios", label: "GestorUsuarios", x: 60, y: 300, w: 200, h: 70, pkg: "server" },
+    { id: "Usuario", label: "Usuario", x: 60, y: 480, w: 200, h: 60, pkg: "server" },
+    { id: "Administrador", label: "Administrador", x: 60, y: 590, w: 200, h: 60, pkg: "server" },
+    { id: "SesionServidor", label: "SesionServidor", x: 60, y: 720, w: 200, h: 60, pkg: "server" },
+
+    { id: "Robot", label: "Robot", x: 330, y: 300, w: 200, h: 70, pkg: "server" },
+    { id: "Eslabon", label: "Eslabon", x: 560, y: 270, w: 130, h: 55, pkg: "server" },
+    { id: "ControladorSerie", label: "ControladorSerie", x: 330, y: 480, w: 200, h: 60, pkg: "server" },
+    { id: "GestorGCode", label: "GestorGCode", x: 330, y: 660, w: 200, h: 60, pkg: "server" },
+    { id: "GestorBD", label: "GestorBD", x: 270, y: 540, w: 150, h: 55, pkg: "server" },
+    { id: "GestorLog", label: "GestorLog (CSV)", x: 270, y: 720, w: 150, h: 55, pkg: "server" },
+
+    // ===== Dominio Compartido =====
+    { id: "Peticion", label: "Peticion", x: 760, y: 300, w: 180, h: 60, pkg: "shared" },
+    { id: "Respuesta", label: "Respuesta", x: 760, y: 420, w: 180, h: 60, pkg: "shared" },
+    { id: "ComandoGCode", label: "ComandoGCode", x: 760, y: 560, w: 200, h: 60, pkg: "shared" },
+
+    // ===== Cliente (Python) =====
+    { id: "InterfazUsuario", label: "InterfazUsuario", x: 1060, y: 120, w: 220, h: 70, pkg: "client" },
+    { id: "ClienteRPC", label: "ClienteRPC", x: 1060, y: 300, w: 220, h: 70, pkg: "client" },
+    { id: "SesionCliente", label: "SesionCliente", x: 1060, y: 500, w: 220, h: 60, pkg: "client" },
+    { id: "GestorArchivos", label: "GestorArchivos", x: 1290, y: 300, w: 180, h: 60, pkg: "client" },
+    { id: "ControlManual", label: "ControlManual", x: 1290, y: 500, w: 180, h: 60, pkg: "client" },
+    { id: "ControlAutomatico", label: "ControlAutomatico", x: 1290, y: 620, w: 180, h: 60, pkg: "client" },
+    { id: "Visualizador3D", label: "Visualizador3D (op)", x: 1290, y: 760, w: 180, h: 60, pkg: "client" },
+  ];
+
+  type Edge = {
+    from: string;
+    to: string;
+    type: "association" | "dependency" | "inheritance" | "aggregation" | "composition";
+    label?: string;
+    mFrom?: string; // multiplicity near from
+    mTo?: string;   // multiplicity near to
+    fromAnchor?: "left" | "right" | "top" | "bottom";
+    toAnchor?: "left" | "right" | "top" | "bottom";
+  };
+
+  const edges: Edge[] = [
+    // === Servidor: asociaciones principales del servicio ===
+    { from: "ServidorRPC", to: "GestorUsuarios", type: "association", label: "auth" },
+    { from: "ServidorRPC", to: "Robot", type: "association", label: "control" },
+    { from: "ServidorRPC", to: "GestorBD", type: "association", label: "db" },
+    { from: "ServidorRPC", to: "GestorLog", type: "association", label: "log" },
+    { from: "ServidorRPC", to: "GestorGCode", type: "association", label: "gcode store" },
+
+    // Sesiones
+    { from: "ServidorRPC", to: "SesionServidor", type: "aggregation", mFrom: "1", mTo: "0..*", label: "sesiones" },
+
+    // Usuarios y roles
+    { from: "GestorUsuarios", to: "Usuario", type: "aggregation", mFrom: "1", mTo: "0..*" },
+    { from: "Administrador", to: "Usuario", type: "inheritance" },
+    { from: "GestorUsuarios", to: "GestorBD", type: "association", label: "persist" },
+
+    // Robot estructura
+    { from: "Robot", to: "Eslabon", type: "composition", mFrom: "1", mTo: "3" },
+    { from: "Robot", to: "ControladorSerie", type: "association", label: "serial" },
+    { from: "Robot", to: "GestorGCode", type: "association", label: "interpreta" },
+
+    // Dominio compartido
+    { from: "ServidorRPC", to: "Peticion", type: "association", label: "consume" },
+    { from: "ServidorRPC", to: "Respuesta", type: "association", label: "produce" },
+    { from: "GestorGCode", to: "ComandoGCode", type: "association", label: "parsea" },
+
+    // === Cliente: asociaciones principales ===
+    { from: "InterfazUsuario", to: "ClienteRPC", type: "association", label: "usa" },
+    { from: "InterfazUsuario", to: "SesionCliente", type: "aggregation", mFrom: "1", mTo: "1" },
+    { from: "ControlManual", to: "ClienteRPC", type: "association", label: "invoca" },
+    { from: "ControlAutomatico", to: "ClienteRPC", type: "association", label: "invoca" },
+    { from: "ControlAutomatico", to: "GestorArchivos", type: "association", label: "lee gcode" },
+    { from: "GestorArchivos", to: "ComandoGCode", type: "association", label: "carga" },
+    { from: "Visualizador3D", to: "ClienteRPC", type: "association", label: "datos" },
+
+    // RPC
+    { from: "ClienteRPC", to: "ServidorRPC", type: "dependency", label: "XML-RPC" },
+    { from: "ClienteRPC", to: "Peticion", type: "association", label: "envía" },
+    { from: "ClienteRPC", to: "Respuesta", type: "association", label: "recibe" },
+  ];
+
+  // Node map for quick lookup
+  const map = Object.fromEntries(nodes.map((n) => [n.id, n]));
+
+  function anchorXY(n: Node, where: Edge["fromAnchor"]) {
+    const cx = n.x + n.w / 2;
+    const cy = n.y + n.h / 2;
+    if (where === "left") return { x: n.x, y: cy };
+    if (where === "right") return { x: n.x + n.w, y: cy };
+    if (where === "top") return { x: cx, y: n.y };
+    if (where === "bottom") return { x: cx, y: n.y + n.h };
+    // default: choose closest side depending on horizontal layout
+    return { x: n.x + n.w, y: cy };
+  }
+
+  function autoAnchors(a: Node, b: Node): [Edge["fromAnchor"], Edge["toAnchor"]] {
+    // Simple heuristic: connect horizontally when far in X, vertically otherwise
+    const dx = (b.x + b.w / 2) - (a.x + a.w / 2);
+    const dy = (b.y + b.h / 2) - (a.y + a.h / 2);
+    if (Math.abs(dx) > Math.abs(dy)) {
+      return [dx > 0 ? "right" : "left", dx > 0 ? "left" : "right"];
+    }
+    return [dy > 0 ? "bottom" : "top", dy > 0 ? "top" : "bottom"];
+  }
+
+  function edgePath(e: Edge) {
+    const a = map[e.from];
+    const b = map[e.to];
+    if (!a || !b) return { d: "", start: { x: 0, y: 0 }, end: { x: 0, y: 0 } };
+
+    const [fa, ta] = [e.fromAnchor, e.toAnchor] as [Edge["fromAnchor"], Edge["toAnchor"]];
+    const [fAuto, tAuto] = autoAnchors(a, b);
+    const fromA = anchorXY(a, fa || fAuto);
+    const toA = anchorXY(b, ta || tAuto);
+
+    // Use a simple cubic curve for nicer edges
+    const dx = (toA.x - fromA.x) * 0.5;
+    const c1 = { x: fromA.x + dx, y: fromA.y };
+    const c2 = { x: toA.x - dx, y: toA.y };
+    const d = `M ${fromA.x},${fromA.y} C ${c1.x},${c1.y} ${c2.x},${c2.y} ${toA.x},${toA.y}`;
+    return { d, start: fromA, end: toA };
+  }
+
+  // Render helpers
+  const pkgBounds = {
+    server: { x: 20, y: 60, w: 700, h: 840, title: "Servidor (C++)" },
+    shared: { x: 720, y: 60, w: 240, h: 840, title: "Dominio Compartido" },
+    client: { x: 980, y: 60, w: 520, h: 900, title: "Cliente (Python)" },
+  } as const;
+
+  function PackageBox({ kind }: { kind: keyof typeof pkgBounds }) {
+    const b = pkgBounds[kind];
+    const bg = kind === "server" ? colors.server : kind === "shared" ? colors.shared : colors.client;
+    return (
+      <div
+        className="absolute rounded-2xl border border-zinc-300 shadow-sm"
+        style={{ left: b.x, top: b.y, width: b.w, height: b.h, background: bg }}
+      >
+        <div className="px-4 py-2 text-sm font-semibold text-zinc-700">{b.title}</div>
+      </div>
+    );
+  }
+
+  function Card({ n }: { n: Node }) {
+    return (
+      <div
+        className="absolute rounded-2xl shadow-md border border-zinc-300 p-2 text-xs bg-white"
+        style={{ left: n.x, top: n.y, width: n.w, height: n.h }}
+      >
+        <div className="font-semibold text-zinc-800 text-[13px]">{n.label}</div>
+      </div>
+    );
+  }
+
+  function Multiplicity({ x, y, text }: { x: number; y: number; text?: string }) {
+    if (!text) return null;
+    return (
+      <text x={x} y={y} fontSize={10} fill={colors.label} textAnchor="middle" dominantBaseline="central">
+        {text}
+      </text>
+    );
+  }
+
+  function EdgePath({ e }: { e: Edge }) {
+    const p = edgePath(e);
+    const stroke = colors.stroke;
+    const dash = e.type === "dependency" ? "4,4" : undefined;
+
+    // Arrowheads / diamonds
+    const arrowId = `arrow-${e.type}`;
+
+    return (
+      <g>
+        <path d={p.d} stroke={stroke} strokeWidth={1.5} fill="none" strokeDasharray={dash} />
+        {/* Labels near middle */}
+        {e.label && (
+          <text>
+            <textPath href={`#${e.from}-${e.to}`} startOffset="50%" />
+          </text>
+        )}
+        {/* Multiplicities (approx positions near ends) */}
+        <Multiplicity x={p.start.x + (p.end.x - p.start.x) * 0.15} y={p.start.y + (p.end.y - p.start.y) * 0.15 - 10} text={e.mFrom} />
+        <Multiplicity x={p.end.x - (p.end.x - p.start.x) * 0.15} y={p.end.y - (p.end.y - p.start.y) * 0.15 - 10} text={e.mTo} />
+
+        {/* Marker at end depending on type */}
+        {e.type === "inheritance" && (
+          <polygon points={`${p.end.x},${p.end.y} ${p.end.x - 10},${p.end.y - 6} ${p.end.x - 10},${p.end.y + 6}`} fill="#ffffff" stroke={stroke} strokeWidth={1.5} />
+        )}
+        {e.type === "association" && (
+          <circle cx={p.end.x} cy={p.end.y} r={2.2} fill={stroke} />
+        )}
+        {e.type === "dependency" && (
+          <polygon points={`${p.end.x},${p.end.y} ${p.end.x - 8},${p.end.y - 5} ${p.end.x - 8},${p.end.y + 5}`} fill={stroke} />
+        )}
+        {e.type === "aggregation" && (
+          <polygon points={`${p.start.x},${p.start.y} ${p.start.x + 10},${p.start.y - 6} ${p.start.x + 20},${p.start.y} ${p.start.x + 10},${p.start.y + 6}`} fill="#ffffff" stroke={stroke} strokeWidth={1.5} />
+        )}
+        {e.type === "composition" && (
+          <polygon points={`${p.start.x},${p.start.y} ${p.start.x + 10},${p.start.y - 6} ${p.start.x + 20},${p.start.y} ${p.start.x + 10},${p.start.y + 6}`} fill={stroke} stroke={stroke} strokeWidth={1.5} />
+        )}
+
+        {/* Edge label at mid */}
+        {e.label && (
+          <text x={(p.start.x + p.end.x) / 2} y={(p.start.y + p.end.y) / 2 - 6} fontSize={11} fill={colors.label} textAnchor="middle">
+            {e.label}
+          </text>
+        )}
+      </g>
+    );
+  }
+
+  return (
+    <div className="w-full h-full overflow-auto p-4">
+      <div className="mb-3 flex items-end justify-between">
+        <div>
+          <h1 className="text-xl font-semibold">UML – Vista Global (Integrador POO – Robot RRR)</h1>
+          <p className="text-sm text-zinc-600">Paquetes: Servidor (C++), Dominio Compartido, Cliente (Python). Relaciones principales según consigna.</p>
+        </div>
+        <div className="text-xs text-zinc-700 bg-white rounded-xl border border-zinc-300 px-3 py-2 shadow-sm">
+          <div className="font-semibold mb-1">Leyenda</div>
+          <div>▲ Herencia</div>
+          <div>◆ Composición</div>
+          <div>◇ Agregación</div>
+          <div>—— Asociación</div>
+          <div>⋯⋯ Dependencia</div>
+        </div>
+      </div>
+
+      <div className="relative" style={{ width: W, height: H }}>
+        {/* Package areas */}
+        <PackageBox kind="server" />
+        <PackageBox kind="shared" />
+        <PackageBox kind="client" />
+
+        {/* SVG overlay for edges */}
+        <svg className="absolute left-0 top-0" width={W} height={H}>
+          {edges.map((e, i) => (
+            <EdgePath key={i} e={e} />
+          ))}
+        </svg>
+
+        {/* Nodes */}
+        {nodes.map((n) => (
+          <Card key={n.id} n={n} />
+        ))}
+      </div>
+
+      <div className="mt-4 text-xs text-zinc-600">
+        <p>
+          Nota: Este es un diagrama conceptual para la primera entrega (E.1). En el informe final, se recomienda
+          incluir además diagramas de clases detallados por paquete y al menos un diagrama de secuencia para un caso de uso
+          (p. ej., ejecución automática de archivo G-Code) y un diagrama de actividad del Servidor.
+        </p>
+      </div>
+    </div>
+  );
+}
