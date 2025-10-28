@@ -6,6 +6,7 @@
 #include <memory>
 #include "../lib/XmlRpc.h"
 #include "RPCExceptions.h"
+#include "Robot.h"
 
 namespace RPCServer {
 
@@ -123,20 +124,36 @@ private:
     std::unique_ptr<XmlRpc::XmlRpcServer> server;
     std::unique_ptr<ServerConfig> config;
     std::vector<std::unique_ptr<ServiceMethod>> methods;
+    std::unique_ptr<Robot> robot_;
     bool isRunning;
 
 public:
     ServerModel(std::unique_ptr<ServerConfig> serverConfig)
-        : config(std::move(serverConfig)), isRunning(false) {
+      : config(std::move(serverConfig)), isRunning(false) {
         server = std::make_unique<XmlRpc::XmlRpcServer>();
+        robot_ = std::make_unique<Robot>(); // inicializar robot
         initializeMethods();
     }
-
+ // Declaración de helper para registrar métodos del Robot (definido más abajo)
+    friend inline void registerRobotMethods(XmlRpc::XmlRpcServer*,
+        std::vector<std::unique_ptr<ServiceMethod>>&,
+        Robot*);
+    
     void initializeMethods() {
         try {
             methods.push_back(std::make_unique<ServerTestMethod>(server.get()));
             methods.push_back(std::make_unique<EchoMethod>(server.get()));
             methods.push_back(std::make_unique<SumMethod>(server.get()));
+            // Métodos del Robot (UML ServidorRPC)
+           methods.push_back(std::make_unique<ConnectRobotMethod>(server.get(), robot_.get()));
+           methods.push_back(std::make_unique<DisconnectRobotMethod>(server.get(), robot_.get()));
+           methods.push_back(std::make_unique<SetModeMethod>(server.get(), robot_.get()));
+           methods.push_back(std::make_unique<EnableMotorsMethod>(server.get(), robot_.get()));
+           methods.push_back(std::make_unique<HomeMethod>(server.get(), robot_.get()));
+           methods.push_back(std::make_unique<MoveMethod>(server.get(), robot_.get()));
+           methods.push_back(std::make_unique<EndEffectorMethod>(server.get(), robot_.get()));
+            // Registrar métodos relacionados al Robot
+            registerRobotMethods(server.get(), methods, robot_.get());
         } catch (const std::exception& e) {
             throw ServerInitializationException("Falló la inicialización de métodos: " + std::string(e.what()));
         }
@@ -177,6 +194,125 @@ public:
     bool getIsRunning() const { return isRunning; }
     int getPort() const { return config->getPort(); }
 };
+
+class ConnectRobotMethod : public ServiceMethod {
+    Robot* robot;
+public:
+    ConnectRobotMethod(XmlRpc::XmlRpcServer* server, Robot* r)
+      : ServiceMethod("connectRobot", "Conecta al puerto serie del robot", server), robot(r) {}
+    void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
+        try {
+            if (params.size() < 1) throw InvalidParametersException("connectRobot", "port:string [, baud:int=9600]");
+            std::string port = std::string(params[0]);
+            int baud = 9600;
+            if (params.size() >= 2) baud = int(params[1]);
+            if (robot->connect(port, baud)) { result["ok"] = true; result["message"] = "Conectado"; }
+            else { result["ok"] = false; result["message"] = "Fallo conectando"; }
+        } catch (const std::exception& e) {
+            throw MethodExecutionException("connectRobot", e.what());
+        }
+    }
+};
+
+
+class DisconnectRobotMethod : public ServiceMethod {
+    Robot* robot;
+public:
+    DisconnectRobotMethod(XmlRpc::XmlRpcServer* server, Robot* r)
+      : ServiceMethod("disconnectRobot", "Desconecta el puerto serie", server), robot(r) {}
+    void execute(XmlRpc::XmlRpcValue& /*params*/, XmlRpc::XmlRpcValue& result) override {
+        try { robot->disconnect(); result["ok"]=true; result["message"]="Desconectado"; }
+        catch (const std::exception& e) { throw MethodExecutionException("disconnectRobot", e.what()); }
+    }
+};
+
+class SetModeMethod : public ServiceMethod {
+    Robot* robot;
+public:
+    SetModeMethod(XmlRpc::XmlRpcServer* server, Robot* r)
+      : ServiceMethod("setMode", "Configura modo manual/absoluto", server), robot(r) {}
+    void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
+        try {
+            if (params.size() < 2) throw InvalidParametersException("setMode", "manual:bool, absolute:bool");
+            if (!robot->isConnected()) { result["ok"]=false; result["message"]="No conectado"; return; }
+            bool manual = bool(params[0]); bool absolute = bool(params[1]);
+            bool ok = robot->setMode(manual, absolute);
+            result["ok"]=ok; result["message"]= ok ? "OK" : "Fallo setMode";
+        } catch (const std::exception& e) { throw MethodExecutionException("setMode", e.what()); }
+    }
+};
+
+
+class EnableMotorsMethod : public ServiceMethod {
+    Robot* robot;
+public:
+    EnableMotorsMethod(XmlRpc::XmlRpcServer* server, Robot* r)
+      : ServiceMethod("enableMotors", "Enciende/Apaga motores", server), robot(r) {}
+    void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
+        try {
+            if (params.size() < 1) throw InvalidParametersException("enableMotors", "on:bool");
+            if (!robot->isConnected()) { result["ok"]=false; result["message"]="No conectado"; return; }
+            bool on = bool(params[0]);
+            bool ok = robot->enableMotors(on);
+            result["ok"]=ok; result["message"]= ok ? (on?"Motores ON":"Motores OFF") : "Fallo enableMotors";
+        } catch (const std::exception& e) { throw MethodExecutionException("enableMotors", e.what()); }
+    }
+};
+
+class HomeMethod : public ServiceMethod {
+    Robot* robot;
+public:
+    HomeMethod(XmlRpc::XmlRpcServer* server, Robot* r)
+      : ServiceMethod("home", "Homing del robot", server), robot(r) {}
+    void execute(XmlRpc::XmlRpcValue& /*params*/, XmlRpc::XmlRpcValue& result) override {
+        try {
+            if (!robot->isConnected()) { result["ok"]=false; result["message"]="No conectado"; return; }
+            bool ok = robot->home();
+            result["ok"]=ok; result["message"]= ok ? "Home ejecutado" : "Fallo home";
+        } catch (const std::exception& e) { throw MethodExecutionException("home", e.what()); }
+    }
+};
+
+
+
+class MoveMethod : public ServiceMethod {
+    Robot* robot;
+public:
+    MoveMethod(XmlRpc::XmlRpcServer* server, Robot* r)
+      : ServiceMethod("move", "Movimiento cartesiano", server), robot(r) {}
+    void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
+        try {
+            if (params.size() < 4) throw InvalidParametersException("move", "x:double, y:double, z:double, vel:double");
+            if (!robot->isConnected()) { result["ok"]=false; result["message"]="No conectado"; return; }
+            double x = double(params[0]), y = double(params[1]), z = double(params[2]), vel = double(params[3]);
+            bool ok = robot->move(x,y,z,vel);
+            result["ok"]=ok; result["message"]= ok ? "Movimiento enviado" : "Fallo move";
+        } catch (const std::exception& e) { throw MethodExecutionException("move", e.what()); }
+    }
+};
+
+class EndEffectorMethod : public ServiceMethod {
+    Robot* robot;
+public:
+    EndEffectorMethod(XmlRpc::XmlRpcServer* server, Robot* r)
+      : ServiceMethod("endEffector", "Activa/Desactiva efector final", server), robot(r) {}
+    void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
+        try {
+            if (params.size() < 1) throw InvalidParametersException("endEffector", "on:bool");
+            if (!robot->isConnected()) { result["ok"]=false; result["message"]="No conectado"; return; }
+            bool on = bool(params[0]);
+            bool ok = robot->endEffector(on);
+            result["ok"]=ok; result["message"]= ok ? (on?"Efector ON":"Efector OFF") : "Fallo endEffector";
+        } catch (const std::exception& e) { throw MethodExecutionException("endEffector", e.what()); }
+    }
+};
+
+// Helper: registrar aquí los métodos relacionados al Robot
+inline void registerRobotMethods(XmlRpc::XmlRpcServer* srv,
+    std::vector<std::unique_ptr<ServiceMethod>>& methods, Robot* robot) {
+    methods.push_back(std::make_unique<ConnectRobotMethod>(srv, robot));
+    // TODO: agregar aquí SetModeMethod, EnableMotorsMethod, HomeMethod, MoveMethod, EndEffectorMethod, DisconnectRobotMethod
+}
 
 } // namespace RPCServer
 
