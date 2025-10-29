@@ -25,7 +25,7 @@ XMLRPC_SOURCES = lib/XmlRpcClient.cpp \
 XMLRPC_OBJECTS = $(XMLRPC_SOURCES:.cpp=.o)
 
 # Target executable
-TARGET = servidor
+TARGET = servidor_rpc
 
 # All targets
 all: $(TARGET)

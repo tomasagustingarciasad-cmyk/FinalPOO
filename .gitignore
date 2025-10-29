@@ -1,2 +1,4 @@
 cliente-web/node_modules
-
+*.o
+*.so
+*.dSYM

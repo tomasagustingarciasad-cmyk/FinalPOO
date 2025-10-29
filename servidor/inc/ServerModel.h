@@ -10,6 +10,14 @@
 
 namespace RPCServer {
 
+// Forward declarations
+class ServiceMethod;
+class Robot;
+
+// Helper function declaration
+void registerRobotMethods(XmlRpc::XmlRpcServer* srv,
+    std::vector<std::unique_ptr<ServiceMethod>>& methods, Robot* robot);
+
 /**
  * @brief Modelo de datos de configuración del servidor
  */
@@ -144,14 +152,8 @@ public:
             methods.push_back(std::make_unique<ServerTestMethod>(server.get()));
             methods.push_back(std::make_unique<EchoMethod>(server.get()));
             methods.push_back(std::make_unique<SumMethod>(server.get()));
-            // Métodos del Robot (UML ServidorRPC)
-           methods.push_back(std::make_unique<ConnectRobotMethod>(server.get(), robot_.get()));
-           methods.push_back(std::make_unique<DisconnectRobotMethod>(server.get(), robot_.get()));
-           methods.push_back(std::make_unique<SetModeMethod>(server.get(), robot_.get()));
-           methods.push_back(std::make_unique<EnableMotorsMethod>(server.get(), robot_.get()));
-           methods.push_back(std::make_unique<HomeMethod>(server.get(), robot_.get()));
-           methods.push_back(std::make_unique<MoveMethod>(server.get(), robot_.get()));
-           methods.push_back(std::make_unique<EndEffectorMethod>(server.get(), robot_.get()));
+            // Métodos del Robot (UML ServidorRPC) - ya definidos abajo
+            // Los métodos del robot se registran en registerRobotMethods()
             // Registrar métodos relacionados al Robot
             registerRobotMethods(server.get(), methods, robot_.get());
         } catch (const std::exception& e) {
@@ -311,7 +313,12 @@ public:
 inline void registerRobotMethods(XmlRpc::XmlRpcServer* srv,
     std::vector<std::unique_ptr<ServiceMethod>>& methods, Robot* robot) {
     methods.push_back(std::make_unique<ConnectRobotMethod>(srv, robot));
-    // TODO: agregar aquí SetModeMethod, EnableMotorsMethod, HomeMethod, MoveMethod, EndEffectorMethod, DisconnectRobotMethod
+    methods.push_back(std::make_unique<DisconnectRobotMethod>(srv, robot));
+    methods.push_back(std::make_unique<SetModeMethod>(srv, robot));
+    methods.push_back(std::make_unique<EnableMotorsMethod>(srv, robot));
+    methods.push_back(std::make_unique<HomeMethod>(srv, robot));
+    methods.push_back(std::make_unique<MoveMethod>(srv, robot));
+    methods.push_back(std::make_unique<EndEffectorMethod>(srv, robot));
 }
 
 } // namespace RPCServer

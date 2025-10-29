@@ -18,6 +18,7 @@ docker exec -i finalpoo createdb -U postgres poo
 <!-- Existe un programa para visualizar bases de datos que se llama DBeaver. Descargar para comodidad y visualizacion -->
 
 # Crear esquema, tabla de usuario e insertar usuarios
+sudo apt install postgresql-client
 psql "postgresql://postgres:pass123@localhost:31432/poo" -v ON_ERROR_STOP=1 -f db/init.sql
 
 <!-- Esto lo que hace es ejecutar dentro del contenedor y en la base de datos el archivo init.sql. Se pueden crear mas archivos .sql que ejecuten otros comandos y lo unico que debe ser cambiado es la referencia final al archivo que se quiere ejecutar.  -->
