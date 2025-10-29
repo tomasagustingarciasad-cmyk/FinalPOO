@@ -110,17 +110,19 @@ std::string SerialPort::readLine(int timeoutMs) {
         fd_set set;
         FD_ZERO(&set);
         FD_SET(fd_, &set);
-        timeval tv{0, 50 * 1000}; // 50ms
+        timeval tv{0, 10 * 1000}; // 10ms (más fino para no perder datos)
         int rv = select(fd_ + 1, &set, nullptr, nullptr, &tv);
-        elapsed += 50;
+        elapsed += 10;
         if (rv > 0 && FD_ISSET(fd_, &set)) {
             ssize_t n = ::read(fd_, &ch, 1);
             if (n == 1) {
-                if (ch == '\n') break;
+                if (ch == '\n') return buffer; // Línea completa
                 if (ch != '\r') buffer.push_back(ch);
+                elapsed = 0; // Reset timeout si estamos recibiendo datos
             }
         }
     }
+    // Si el buffer tiene algo pero no terminó en \n, lo retornamos igual
     return buffer;
 }
 bool SerialPort::isOpen() const { return opened_; }

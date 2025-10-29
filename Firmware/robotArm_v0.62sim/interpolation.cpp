@@ -8,6 +8,12 @@ Interpolation::Interpolation(){
   pos_offset.ymm = 0.0;
   pos_offset.zmm = 0.0;
   pos_offset.emm = 0.0;
+    
+  // Inicializar coordenadas actuales en 0
+  xPosmm = 0.0;
+  yPosmm = 0.0;
+  zPosmm = 0.0;
+  ePosmm = 0.0;
 }
 
 //G92 POSITION OFFSET FUNCTIONS
