@@ -23,4 +23,4 @@ private:
     bool sendAndWaitOk(const std::string& line, int timeoutMs = 5000);
     std::string readLine(int timeoutMs = 500);
 };
-} // namespace RPCServer
+} // namespace RPCServer.
