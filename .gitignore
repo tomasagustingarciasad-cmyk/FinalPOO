@@ -3,3 +3,4 @@ cliente-web/node_modules
 *.so
 *.dSYM
 servidor/servidor
+servidor/servidor_rpc
