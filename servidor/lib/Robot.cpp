@@ -83,4 +83,9 @@ bool Robot::endEffector(bool on){
     return sendAndWaitOk(on ? "M106" : "M107", 3000);
 }
 
+bool Robot::sendGcodeCommand(const std::string& command){
+    // Método público para enviar comandos G-code directamente
+    return sendAndWaitOk(command, 5000);
+}
+
 } // namespace RPCServer

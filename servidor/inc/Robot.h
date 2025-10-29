@@ -19,6 +19,7 @@ public:
     bool home();
     bool move(double x, double y, double z, double vel);
     bool endEffector(bool on);
+    bool sendGcodeCommand(const std::string& command);
 private:
     bool sendAndWaitOk(const std::string& line, int timeoutMs = 5000);
     std::string readLine(int timeoutMs = 500);

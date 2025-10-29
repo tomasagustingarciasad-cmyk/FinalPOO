@@ -330,15 +330,90 @@ class EndEffectorMethod : public ServiceMethod {
     Robot* robot;
 public:
     EndEffectorMethod(XmlRpc::XmlRpcServer* server, Robot* r)
-      : ServiceMethod("endEffector", "Activa/Desactiva efector final", server), robot(r) {}
+      : ServiceMethod("endEffector", "Control gripper/endeffector", server), robot(r) {}
     void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
         try {
             if (params.size() < 1) throw InvalidParametersException("endEffector", "on:bool");
             if (!robot->isConnected()) { result["ok"]=false; result["message"]="No conectado"; return; }
             bool on = bool(params[0]);
             bool ok = robot->endEffector(on);
-            result["ok"]=ok; result["message"]= ok ? (on?"Efector ON":"Efector OFF") : "Fallo endEffector";
+            result["ok"]=ok; result["message"]= ok ? (on?"Gripper ON":"Gripper OFF") : "Fallo endEffector";
         } catch (const std::exception& e) { throw MethodExecutionException("endEffector", e.what()); }
+    }
+};
+
+class ExecuteGcodeMethod : public ServiceMethod {
+    Robot* robot;
+public:
+    ExecuteGcodeMethod(XmlRpc::XmlRpcServer* server, Robot* r)
+      : ServiceMethod("executeGcode", "Ejecuta código G-code en el robot", server), robot(r) {}
+    
+    void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
+        try {
+            if (params.size() < 1) {
+                throw InvalidParametersException("executeGcode", "gcode:string");
+            }
+            
+            if (!robot->isConnected()) {
+                result["success"] = false;
+                result["message"] = "Robot no conectado";
+                return;
+            }
+            
+            std::string gcode = std::string(params[0]);
+            
+            // Parsear y ejecutar línea por línea
+            std::istringstream stream(gcode);
+            std::string line;
+            int lineCount = 0;
+            int successCount = 0;
+            std::vector<std::string> errors;
+            
+            while (std::getline(stream, line)) {
+                lineCount++;
+                
+                // Limpiar la línea (quitar espacios y comentarios al final)
+                size_t commentPos = line.find(';');
+                if (commentPos != std::string::npos) {
+                    line = line.substr(0, commentPos);
+                }
+                
+                // Quitar espacios al inicio y final
+                line.erase(0, line.find_first_not_of(" \t\r\n"));
+                line.erase(line.find_last_not_of(" \t\r\n") + 1);
+                
+                // Saltar líneas vacías
+                if (line.empty()) {
+                    continue;
+                }
+                
+                // Enviar comando al robot
+                if (robot->sendGcodeCommand(line)) {
+                    successCount++;
+                } else {
+                    errors.push_back("Línea " + std::to_string(lineCount) + ": " + line);
+                }
+            }
+            
+            if (errors.empty()) {
+                result["success"] = true;
+                result["message"] = "G-code ejecutado exitosamente";
+                result["linesProcessed"] = successCount;
+            } else {
+                result["success"] = false;
+                result["message"] = "Algunos comandos fallaron";
+                result["linesProcessed"] = successCount;
+                
+                // Convertir vector de errores a XmlRpcValue array
+                result["errors"].setSize(errors.size());
+                for (size_t i = 0; i < errors.size(); ++i) {
+                    result["errors"][i] = errors[i];
+                }
+            }
+            
+        } catch (const std::exception& e) {
+            throw MethodExecutionException("executeGcode", e.what());
+        }
     }
 };
 
@@ -352,6 +427,7 @@ inline void registerRobotMethods(XmlRpc::XmlRpcServer* srv,
     methods.push_back(std::make_unique<HomeMethod>(srv, robot));
     methods.push_back(std::make_unique<MoveMethod>(srv, robot));
     methods.push_back(std::make_unique<EndEffectorMethod>(srv, robot));
+    methods.push_back(std::make_unique<ExecuteGcodeMethod>(srv, robot));
 }
 
 /**
@@ -1505,6 +1581,274 @@ public:
 };
 
 /**
+ * @brief Método XML-RPC para crear rutinas G-code
+ */
+class RoutineCreateMethod : public ServiceMethod {
+private:
+    std::shared_ptr<UserManager> userManager_;
+    std::shared_ptr<RoutineManager> routineManager_;
+    
+public:
+    RoutineCreateMethod(XmlRpc::XmlRpcServer* srv, std::shared_ptr<UserManager> userMgr, std::shared_ptr<RoutineManager> routineMgr)
+        : ServiceMethod("routineCreate", "Crear nueva rutina G-code", srv), userManager_(userMgr), routineManager_(routineMgr) {}
+    
+    void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
+        if (params.size() != 5) {
+            throw XmlRpc::XmlRpcException("routineCreate requiere 5 parámetros: token, filename, originalFilename, description, gcodeContent");
+        }
+        
+        std::string token = params[0];
+        std::string filename = params[1];
+        std::string originalFilename = params[2];
+        std::string description = params[3];
+        std::string gcodeContent = params[4];
+        
+        try {
+            // Verificar token
+            if (!userManager_->validateToken(token)) {
+                result["success"] = false;
+                result["message"] = "Token inválido";
+                return;
+            }
+            
+            auto currentUser = userManager_->getUserByToken(token);
+            if (!currentUser) {
+                result["success"] = false;
+                result["message"] = "Usuario no encontrado";
+                return;
+            }
+            
+            int routineId = routineManager_->createRoutine(filename, originalFilename, description, gcodeContent, currentUser->id);
+            
+            if (routineId > 0) {
+                result["success"] = true;
+                result["routineId"] = routineId;
+                result["message"] = "Rutina creada exitosamente";
+            } else {
+                result["success"] = false;
+                result["message"] = "Error creando rutina (posiblemente ya existe)";
+            }
+            
+        } catch (const std::exception& e) {
+            result["success"] = false;
+            result["message"] = std::string("Error: ") + e.what();
+        }
+    }
+};
+
+/**
+ * @brief Método XML-RPC para listar rutinas G-code
+ */
+class RoutineListMethod : public ServiceMethod {
+private:
+    std::shared_ptr<UserManager> userManager_;
+    std::shared_ptr<RoutineManager> routineManager_;
+    
+public:
+    RoutineListMethod(XmlRpc::XmlRpcServer* srv, std::shared_ptr<UserManager> userMgr, std::shared_ptr<RoutineManager> routineMgr)
+        : ServiceMethod("routineList", "Listar rutinas G-code", srv), userManager_(userMgr), routineManager_(routineMgr) {}
+    
+    void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
+        if (params.size() != 1) {
+            throw XmlRpc::XmlRpcException("routineList requiere 1 parámetro: token");
+        }
+        
+        std::string token = params[0];
+        
+        try {
+            // Verificar token
+            if (!userManager_->validateToken(token)) {
+                result["success"] = false;
+                result["message"] = "Token inválido";
+                return;
+            }
+            
+            auto currentUser = userManager_->getUserByToken(token);
+            if (!currentUser) {
+                result["success"] = false;
+                result["message"] = "Usuario no encontrado";
+                return;
+            }
+            
+            auto routines = routineManager_->getAllRoutines(currentUser->id, currentUser->role);
+            
+            result["success"] = true;
+            result["routines"].setSize(routines.size());
+            
+            for (size_t i = 0; i < routines.size(); ++i) {
+                result["routines"][i]["id"] = routines[i].id;
+                result["routines"][i]["filename"] = routines[i].filename;
+                result["routines"][i]["originalFilename"] = routines[i].originalFilename;
+                result["routines"][i]["description"] = routines[i].description;
+                result["routines"][i]["fileSize"] = routines[i].fileSize;
+                result["routines"][i]["userId"] = routines[i].userId;
+                result["routines"][i]["createdAt"] = static_cast<int>(routines[i].createdAt);
+            }
+            
+        } catch (const std::exception& e) {
+            result["success"] = false;
+            result["message"] = std::string("Error: ") + e.what();
+        }
+    }
+};
+
+/**
+ * @brief Método XML-RPC para obtener rutina G-code específica
+ */
+class RoutineGetMethod : public ServiceMethod {
+private:
+    std::shared_ptr<UserManager> userManager_;
+    std::shared_ptr<RoutineManager> routineManager_;
+    
+public:
+    RoutineGetMethod(XmlRpc::XmlRpcServer* srv, std::shared_ptr<UserManager> userMgr, std::shared_ptr<RoutineManager> routineMgr)
+        : ServiceMethod("routineGet", "Obtener rutina G-code", srv), userManager_(userMgr), routineManager_(routineMgr) {}
+    
+    void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
+        if (params.size() != 2) {
+            throw XmlRpc::XmlRpcException("routineGet requiere 2 parámetros: token, routineId");
+        }
+        
+        std::string token = params[0];
+        int routineId = params[1];
+        
+        try {
+            // Verificar token
+            if (!userManager_->validateToken(token)) {
+                result["success"] = false;
+                result["message"] = "Token inválido";
+                return;
+            }
+            
+            auto currentUser = userManager_->getUserByToken(token);
+            if (!currentUser) {
+                result["success"] = false;
+                result["message"] = "Usuario no encontrado";
+                return;
+            }
+            
+            auto routine = routineManager_->getRoutineById(routineId, currentUser->id, currentUser->role);
+            if (!routine) {
+                result["success"] = false;
+                result["message"] = "Rutina no encontrada o sin permisos";
+                return;
+            }
+            
+            result["success"] = true;
+            result["routine"]["id"] = routine->id;
+            result["routine"]["filename"] = routine->filename;
+            result["routine"]["originalFilename"] = routine->originalFilename;
+            result["routine"]["description"] = routine->description;
+            result["routine"]["gcodeContent"] = routine->gcodeContent;
+            result["routine"]["fileSize"] = routine->fileSize;
+            result["routine"]["userId"] = routine->userId;
+            result["routine"]["createdAt"] = static_cast<int>(routine->createdAt);
+            
+        } catch (const std::exception& e) {
+            result["success"] = false;
+            result["message"] = std::string("Error: ") + e.what();
+        }
+    }
+};
+
+/**
+ * @brief Método XML-RPC para actualizar rutina G-code
+ */
+class RoutineUpdateMethod : public ServiceMethod {
+private:
+    std::shared_ptr<UserManager> userManager_;
+    std::shared_ptr<RoutineManager> routineManager_;
+    
+public:
+    RoutineUpdateMethod(XmlRpc::XmlRpcServer* srv, std::shared_ptr<UserManager> userMgr, std::shared_ptr<RoutineManager> routineMgr)
+        : ServiceMethod("routineUpdate", "Actualizar rutina G-code", srv), userManager_(userMgr), routineManager_(routineMgr) {}
+    
+    void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
+        if (params.size() != 5) {
+            throw XmlRpc::XmlRpcException("routineUpdate requiere 5 parámetros: token, routineId, filename, description, gcodeContent");
+        }
+        
+        std::string token = params[0];
+        int routineId = params[1];
+        std::string filename = params[2];
+        std::string description = params[3];
+        std::string gcodeContent = params[4];
+        
+        try {
+            // Verificar token
+            if (!userManager_->validateToken(token)) {
+                result["success"] = false;
+                result["message"] = "Token inválido";
+                return;
+            }
+            
+            auto currentUser = userManager_->getUserByToken(token);
+            if (!currentUser) {
+                result["success"] = false;
+                result["message"] = "Usuario no encontrado";
+                return;
+            }
+            
+            bool success = routineManager_->updateRoutine(routineId, filename, description, gcodeContent, currentUser->id, currentUser->role);
+            
+            result["success"] = success;
+            result["message"] = success ? "Rutina actualizada exitosamente" : "Error actualizando rutina o sin permisos";
+            
+        } catch (const std::exception& e) {
+            result["success"] = false;
+            result["message"] = std::string("Error: ") + e.what();
+        }
+    }
+};
+
+/**
+ * @brief Método XML-RPC para eliminar rutina G-code
+ */
+class RoutineDeleteMethod : public ServiceMethod {
+private:
+    std::shared_ptr<UserManager> userManager_;
+    std::shared_ptr<RoutineManager> routineManager_;
+    
+public:
+    RoutineDeleteMethod(XmlRpc::XmlRpcServer* srv, std::shared_ptr<UserManager> userMgr, std::shared_ptr<RoutineManager> routineMgr)
+        : ServiceMethod("routineDelete", "Eliminar rutina G-code", srv), userManager_(userMgr), routineManager_(routineMgr) {}
+    
+    void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
+        if (params.size() != 2) {
+            throw XmlRpc::XmlRpcException("routineDelete requiere 2 parámetros: token, routineId");
+        }
+        
+        std::string token = params[0];
+        int routineId = params[1];
+        
+        try {
+            // Verificar token
+            if (!userManager_->validateToken(token)) {
+                result["success"] = false;
+                result["message"] = "Token inválido";
+                return;
+            }
+            
+            auto currentUser = userManager_->getUserByToken(token);
+            if (!currentUser) {
+                result["success"] = false;
+                result["message"] = "Usuario no encontrado";
+                return;
+            }
+            
+            bool success = routineManager_->deleteRoutine(routineId, currentUser->id, currentUser->role);
+            
+            result["success"] = success;
+            result["message"] = success ? "Rutina eliminada exitosamente" : "Error eliminando rutina o sin permisos";
+            
+        } catch (const std::exception& e) {
+            result["success"] = false;
+            result["message"] = std::string("Error: ") + e.what();
+        }
+    }
+};
+
+/**
  * @brief Implementación del método initializeAuthMethods() para ServerModel
  */
 inline void ServerModel::initializeAuthMethods() {
@@ -1517,6 +1861,14 @@ inline void ServerModel::initializeAuthMethods() {
         methods.push_back(std::make_unique<UserInfoMethod>(server.get(), userManager_));
         methods.push_back(std::make_unique<UserUpdateMethod>(server.get(), userManager_));
         methods.push_back(std::make_unique<UserDeleteMethod>(server.get(), userManager_));
+        
+        // Métodos de rutinas G-code
+        auto routineManager = std::make_shared<RoutineManager>(databaseManager_);
+        methods.push_back(std::make_unique<RoutineCreateMethod>(server.get(), userManager_, routineManager));
+        methods.push_back(std::make_unique<RoutineListMethod>(server.get(), userManager_, routineManager));
+        methods.push_back(std::make_unique<RoutineGetMethod>(server.get(), userManager_, routineManager));
+        methods.push_back(std::make_unique<RoutineUpdateMethod>(server.get(), userManager_, routineManager));
+        methods.push_back(std::make_unique<RoutineDeleteMethod>(server.get(), userManager_, routineManager));
     } catch (const std::exception& e) {
         throw ServerInitializationException("Falló la inicialización de métodos de autenticación: " + std::string(e.what()));
     }
