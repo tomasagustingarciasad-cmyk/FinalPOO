@@ -11,8 +11,6 @@
         <h1>Robot Client</h1>
         <nav>
             <% if (user) { %>
-                <a href="/panel">Panel</a>
-                <a href="/robot/move">Move</a>
                 <form method="post" action="/logout" style="display:inline">
                 <button type="submit">Logout (<%= user.username %>)</button>
                 </form>

@@ -4,9 +4,15 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <unordered_map>
+#include <random>
+#include <ctime>
+#include <sstream>
+#include <iostream>
 #include "../lib/XmlRpc.h"
 #include "RPCExceptions.h"
 #include "Robot.h"
+#include "../lib/db_pool.hpp"
 
 namespace RPCServer {
 
@@ -124,6 +130,17 @@ public:
     }
 };
 
+// Forward declarations para clases que se usarán
+class UserManager;
+class DatabaseManager;
+class AuthLoginMethod;
+class AuthLogoutMethod;
+class UserCreateMethod;
+class UserListMethod;
+class UserInfoMethod;
+class UserUpdateMethod;
+class UserDeleteMethod;
+
 /**
  * @brief Clase modelo del servidor que gestiona el servidor RPC
  */
@@ -134,13 +151,23 @@ private:
     std::vector<std::unique_ptr<ServiceMethod>> methods;
     std::unique_ptr<Robot> robot_;
     bool isRunning;
+    
+    // Managers para base de datos y usuarios
+    std::shared_ptr<DatabaseManager> databaseManager_;
+    std::shared_ptr<UserManager> userManager_;
 
 public:
     ServerModel(std::unique_ptr<ServerConfig> serverConfig)
       : config(std::move(serverConfig)), isRunning(false) {
         server = std::make_unique<XmlRpc::XmlRpcServer>();
         robot_ = std::make_unique<Robot>(); // inicializar robot
+        
+        // Inicializar managers
+        databaseManager_ = std::make_shared<DatabaseManager>();
+        userManager_ = std::make_shared<UserManager>(databaseManager_);
+        
         initializeMethods();
+        initializeAuthMethods(); // Llamar después de que todo esté definido
     }
  // Declaración de helper para registrar métodos del Robot (definido más abajo)
     friend inline void registerRobotMethods(XmlRpc::XmlRpcServer*,
@@ -149,9 +176,11 @@ public:
     
     void initializeMethods() {
         try {
+            // Métodos básicos del servidor
             methods.push_back(std::make_unique<ServerTestMethod>(server.get()));
             methods.push_back(std::make_unique<EchoMethod>(server.get()));
             methods.push_back(std::make_unique<SumMethod>(server.get()));
+            
             // Métodos del Robot (UML ServidorRPC) - ya definidos abajo
             // Los métodos del robot se registran en registerRobotMethods()
             // Registrar métodos relacionados al Robot
@@ -160,6 +189,10 @@ public:
             throw ServerInitializationException("Falló la inicialización de métodos: " + std::string(e.what()));
         }
     }
+    
+    // Declaración para método que inicializa los métodos de autenticación
+    void initializeAuthMethods();
+    
 
     void start() {
         try {
@@ -319,6 +352,1174 @@ inline void registerRobotMethods(XmlRpc::XmlRpcServer* srv,
     methods.push_back(std::make_unique<HomeMethod>(srv, robot));
     methods.push_back(std::make_unique<MoveMethod>(srv, robot));
     methods.push_back(std::make_unique<EndEffectorMethod>(srv, robot));
+}
+
+/**
+ * @brief Clase centralizada para manejo de base de datos PostgreSQL
+ */
+class DatabaseManager {
+private:
+    std::shared_ptr<PgPool> dbPool_;
+    
+    std::string hashPassword(const std::string& password) {
+        // Usar la función hash_password de PostgreSQL directamente en la consulta
+        // En lugar de hacer el hash aquí, lo haremos en la consulta SQL
+        return password;  // Retornar la contraseña sin hash para usar en la consulta SQL
+    }
+    
+public:
+    DatabaseManager() {
+        PgConfig cfg;
+        cfg.host = "localhost";
+        cfg.port = 31432;  // Puerto del Docker
+        cfg.dbname = "finalpoo";
+        cfg.user = "postgres";
+        cfg.password = "admin123";
+        cfg.ssl_disable = true;
+        
+        try {
+            dbPool_ = std::make_shared<PgPool>(cfg, 2, 10);
+            std::cout << "DatabaseManager: Conectado a PostgreSQL" << std::endl;
+            createDefaultUsers();
+        } catch (const std::exception& e) {
+            std::cerr << "ERROR DatabaseManager: " << e.what() << std::endl;
+            dbPool_ = nullptr;
+        }
+    }
+    
+    bool isConnected() const { return dbPool_ != nullptr; }
+    
+    // === GESTIÓN DE USUARIOS ===
+    
+    struct User {
+        int id;
+        std::string username;
+        std::string role;
+        bool active;
+        std::time_t createdAt;
+    };
+    
+    void createDefaultUsers() {
+        if (!dbPool_) return;
+        
+        try {
+            auto h = dbPool_->acquire();
+            pqxx::work txn(h.conn());
+            
+            // Verificar si admin existe
+            auto result = txn.exec_params(
+                "SELECT usuario_id FROM finalpoo.usuario WHERE username = $1", "admin");
+            
+            if (result.empty()) {
+                // Crear admin usando hash_password de PostgreSQL
+                txn.exec_params(
+                    "INSERT INTO finalpoo.usuario (username, password_hash, role) VALUES ($1, hash_password($2), $3)",
+                    "admin", "Admin123", "ADMIN");
+            }
+            
+            // Verificar si user existe
+            result = txn.exec_params(
+                "SELECT usuario_id FROM finalpoo.usuario WHERE username = $1", "user");
+            
+            if (result.empty()) {
+                // Crear user usando hash_password de PostgreSQL
+                txn.exec_params(
+                    "INSERT INTO finalpoo.usuario (username, password_hash, role) VALUES ($1, hash_password($2), $3)",
+                    "user", "User123", "OPERATOR");
+            }
+            
+            txn.commit();
+            
+        } catch (const std::exception& e) {
+            std::cerr << "Error creando usuarios por defecto: " << e.what() << std::endl;
+        }
+    }
+    
+    int createUser(const std::string& username, const std::string& password, const std::string& role = "OPERATOR") {
+        if (!dbPool_) return -1;
+        
+        try {
+            auto h = dbPool_->acquire();
+            pqxx::work txn(h.conn());
+            
+            // Verificar si usuario ya existe
+            auto result = txn.exec_params(
+                "SELECT usuario_id FROM finalpoo.usuario WHERE username = $1", username);
+            
+            if (!result.empty()) {
+                return -1; // Usuario ya existe
+            }
+            
+            // Crear nuevo usuario
+            auto insert_result = txn.exec_params(
+                "INSERT INTO finalpoo.usuario (username, password_hash, role) "
+                "VALUES ($1, hash_password($2), $3) RETURNING usuario_id",
+                username, password, role
+            );
+            
+            txn.commit();
+            
+            if (!insert_result.empty()) {
+                return insert_result[0][0].as<int>();
+            }
+            return -1;
+            
+        } catch (const std::exception& e) {
+            std::cerr << "Error creating user: " << e.what() << std::endl;
+            return -1;
+        }
+    }
+    
+    User* authenticateUser(const std::string& username, const std::string& password) {
+        if (!dbPool_) return nullptr;
+        
+        try {
+            auto h = dbPool_->acquire();
+            pqxx::work txn(h.conn());
+            
+            // Usar la función hash_password de PostgreSQL directamente
+            auto result = txn.exec_params(
+                "SELECT usuario_id, username, role, active, "
+                "EXTRACT(EPOCH FROM created_at)::INTEGER as created_at "
+                "FROM finalpoo.usuario WHERE username = $1 AND password_hash = hash_password($2) AND active = true",
+                username, password
+            );
+            
+            if (result.empty()) {
+                return nullptr;
+            }
+            
+            static User user;
+            user.id = result[0][0].as<int>();
+            user.username = result[0][1].as<std::string>();
+            user.role = result[0][2].as<std::string>();
+            user.active = result[0][3].as<bool>();
+            user.createdAt = static_cast<std::time_t>(result[0][4].as<int>());
+            
+            return &user;
+            
+        } catch (const std::exception& e) {
+            std::cerr << "Error authenticating user: " << e.what() << std::endl;
+            return nullptr;
+        }
+    }
+    
+    User* getUserByUsername(const std::string& username) {
+        if (!dbPool_) return nullptr;
+        
+        try {
+            auto h = dbPool_->acquire();
+            pqxx::work txn(h.conn());
+            
+            auto result = txn.exec_params(
+                "SELECT usuario_id, username, role, active, "
+                "EXTRACT(EPOCH FROM created_at)::INTEGER as created_at "
+                "FROM finalpoo.usuario WHERE username = $1",
+                username
+            );
+            
+            if (result.empty()) {
+                return nullptr;
+            }
+            
+            static User user;
+            user.id = result[0][0].as<int>();
+            user.username = result[0][1].as<std::string>();
+            user.role = result[0][2].as<std::string>();
+            user.active = result[0][3].as<bool>();
+            user.createdAt = static_cast<std::time_t>(result[0][4].as<int>());
+            
+            return &user;
+            
+        } catch (const std::exception& e) {
+            std::cerr << "Error getting user by username: " << e.what() << std::endl;
+            return nullptr;
+        }
+    }
+    
+    User* getUserById(int userId) {
+        if (!dbPool_) return nullptr;
+        
+        try {
+            auto h = dbPool_->acquire();
+            pqxx::work txn(h.conn());
+            
+            auto result = txn.exec_params(
+                "SELECT usuario_id, username, role, active, "
+                "EXTRACT(EPOCH FROM created_at)::INTEGER as created_at "
+                "FROM finalpoo.usuario WHERE usuario_id = $1",
+                userId
+            );
+            
+            if (result.empty()) {
+                return nullptr;
+            }
+            
+            static User user;
+            user.id = result[0][0].as<int>();
+            user.username = result[0][1].as<std::string>();
+            user.role = result[0][2].as<std::string>();
+            user.active = result[0][3].as<bool>();
+            user.createdAt = static_cast<std::time_t>(result[0][4].as<int>());
+            
+            return &user;
+            
+        } catch (const std::exception& e) {
+            std::cerr << "Error getting user by ID: " << e.what() << std::endl;
+            return nullptr;
+        }
+    }
+    
+    std::vector<User> getAllUsers() {
+        std::vector<User> result;
+        if (!dbPool_) return result;
+        
+        try {
+            auto h = dbPool_->acquire();
+            pqxx::work txn(h.conn());
+            
+            auto query_result = txn.exec(
+                "SELECT usuario_id, username, role, active, "
+                "EXTRACT(EPOCH FROM created_at)::INTEGER as created_at "
+                "FROM finalpoo.usuario ORDER BY created_at DESC"
+            );
+            
+            for (const auto& row : query_result) {
+                User user;
+                user.id = row[0].as<int>();
+                user.username = row[1].as<std::string>();
+                user.role = row[2].as<std::string>();
+                user.active = row[3].as<bool>();
+                user.createdAt = static_cast<std::time_t>(row[4].as<int>());
+                result.push_back(user);
+            }
+            
+        } catch (const std::exception& e) {
+            std::cerr << "Error getting all users: " << e.what() << std::endl;
+        }
+        
+        return result;
+    }
+    
+    bool updateUser(int userId, const std::string& newUsername, const std::string& newRole) {
+        if (!dbPool_) return false;
+        
+        try {
+            auto h = dbPool_->acquire();
+            pqxx::work txn(h.conn());
+            
+            auto result = txn.exec_params(
+                "UPDATE finalpoo.usuario SET username = $1, role = $2 WHERE usuario_id = $3",
+                newUsername, newRole, userId
+            );
+            
+            txn.commit();
+            return result.affected_rows() > 0;
+            
+        } catch (const std::exception& e) {
+            std::cerr << "Error updating user: " << e.what() << std::endl;
+            return false;
+        }
+    }
+    
+    bool updateUserPassword(const std::string& username, const std::string& newPassword) {
+        if (!dbPool_) return false;
+        
+        try {
+            auto h = dbPool_->acquire();
+            pqxx::work txn(h.conn());
+            
+            auto result = txn.exec_params(
+                "UPDATE finalpoo.usuario SET password_hash = hash_password($1) WHERE username = $2",
+                newPassword, username
+            );
+            
+            txn.commit();
+            return result.affected_rows() > 0;
+            
+        } catch (const std::exception& e) {
+            std::cerr << "Error updating user password: " << e.what() << std::endl;
+            return false;
+        }
+    }
+    
+    bool deleteUser(int userId) {
+        if (!dbPool_) return false;
+        
+        try {
+            auto h = dbPool_->acquire();
+            pqxx::work txn(h.conn());
+            
+            // No permitir eliminar admin
+            auto userCheck = txn.exec_params(
+                "SELECT username FROM finalpoo.usuario WHERE usuario_id = $1", userId);
+            
+            if (!userCheck.empty() && userCheck[0][0].as<std::string>() == "admin") {
+                return false;
+            }
+            
+            auto result = txn.exec_params(
+                "DELETE FROM finalpoo.usuario WHERE usuario_id = $1", userId
+            );
+            
+            txn.commit();
+            return result.affected_rows() > 0;
+            
+        } catch (const std::exception& e) {
+            std::cerr << "Error deleting user: " << e.what() << std::endl;
+            return false;
+        }
+    }
+    
+    // === GESTIÓN DE RUTINAS G-CODE ===
+    
+    struct Routine {
+        int id;
+        std::string filename;
+        std::string originalFilename;
+        std::string description;
+        std::string gcodeContent;
+        int fileSize;
+        int userId;
+        std::time_t createdAt;
+    };
+    
+    int createRoutine(const std::string& filename, const std::string& originalFilename,
+                     const std::string& description, const std::string& gcodeContent, int userId) {
+        if (!dbPool_) return -1;
+        
+        try {
+            auto h = dbPool_->acquire();
+            pqxx::work txn(h.conn());
+            
+            auto result = txn.exec_params(
+                "INSERT INTO finalpoo.gcode_routine (filename, original_filename, description, gcode_content, file_size, user_id) "
+                "VALUES ($1, $2, $3, $4, $5, $6) RETURNING routine_id",
+                filename, originalFilename, description, gcodeContent, static_cast<int>(gcodeContent.size()), userId
+            );
+            
+            txn.commit();
+            
+            if (!result.empty()) {
+                return result[0][0].as<int>();
+            }
+            return -1;
+            
+        } catch (const std::exception& e) {
+            std::cerr << "Error creating routine: " << e.what() << std::endl;
+            return -1;
+        }
+    }
+    
+    Routine* getRoutineById(int routineId) {
+        if (!dbPool_) return nullptr;
+        
+        try {
+            auto h = dbPool_->acquire();
+            pqxx::work txn(h.conn());
+            
+            auto result = txn.exec_params(
+                "SELECT routine_id, filename, original_filename, description, gcode_content, file_size, user_id, "
+                "EXTRACT(EPOCH FROM created_at)::INTEGER as created_at "
+                "FROM finalpoo.gcode_routine WHERE routine_id = $1",
+                routineId
+            );
+            
+            if (result.empty()) {
+                return nullptr;
+            }
+            
+            static Routine routine;
+            routine.id = result[0][0].as<int>();
+            routine.filename = result[0][1].as<std::string>();
+            routine.originalFilename = result[0][2].as<std::string>();
+            routine.description = result[0][3].as<std::string>();
+            routine.gcodeContent = result[0][4].as<std::string>();
+            routine.fileSize = result[0][5].as<int>();
+            routine.userId = result[0][6].as<int>();
+            routine.createdAt = static_cast<std::time_t>(result[0][7].as<int>());
+            
+            return &routine;
+            
+        } catch (const std::exception& e) {
+            std::cerr << "Error getting routine by ID: " << e.what() << std::endl;
+            return nullptr;
+        }
+    }
+    
+    std::vector<Routine> getAllRoutines() {
+        std::vector<Routine> result;
+        if (!dbPool_) return result;
+        
+        try {
+            auto h = dbPool_->acquire();
+            pqxx::work txn(h.conn());
+            
+            auto query_result = txn.exec(
+                "SELECT routine_id, filename, original_filename, description, gcode_content, file_size, user_id, "
+                "EXTRACT(EPOCH FROM created_at)::INTEGER as created_at "
+                "FROM finalpoo.gcode_routine ORDER BY created_at DESC"
+            );
+            
+            for (const auto& row : query_result) {
+                Routine routine;
+                routine.id = row[0].as<int>();
+                routine.filename = row[1].as<std::string>();
+                routine.originalFilename = row[2].as<std::string>();
+                routine.description = row[3].as<std::string>();
+                routine.gcodeContent = row[4].as<std::string>();
+                routine.fileSize = row[5].as<int>();
+                routine.userId = row[6].as<int>();
+                routine.createdAt = static_cast<std::time_t>(row[7].as<int>());
+                result.push_back(routine);
+            }
+            
+        } catch (const std::exception& e) {
+            std::cerr << "Error getting all routines: " << e.what() << std::endl;
+        }
+        
+        return result;
+    }
+    
+    std::vector<Routine> getRoutinesByUser(int userId) {
+        std::vector<Routine> result;
+        if (!dbPool_) return result;
+        
+        try {
+            auto h = dbPool_->acquire();
+            pqxx::work txn(h.conn());
+            
+            auto query_result = txn.exec_params(
+                "SELECT routine_id, filename, original_filename, description, gcode_content, file_size, user_id, "
+                "EXTRACT(EPOCH FROM created_at)::INTEGER as created_at "
+                "FROM finalpoo.gcode_routine WHERE user_id = $1 ORDER BY created_at DESC",
+                userId
+            );
+            
+            for (const auto& row : query_result) {
+                Routine routine;
+                routine.id = row[0].as<int>();
+                routine.filename = row[1].as<std::string>();
+                routine.originalFilename = row[2].as<std::string>();
+                routine.description = row[3].as<std::string>();
+                routine.gcodeContent = row[4].as<std::string>();
+                routine.fileSize = row[5].as<int>();
+                routine.userId = row[6].as<int>();
+                routine.createdAt = static_cast<std::time_t>(row[7].as<int>());
+                result.push_back(routine);
+            }
+            
+        } catch (const std::exception& e) {
+            std::cerr << "Error getting routines by user: " << e.what() << std::endl;
+        }
+        
+        return result;
+    }
+    
+    bool updateRoutine(int routineId, const std::string& filename, const std::string& description, const std::string& gcodeContent) {
+        if (!dbPool_) return false;
+        
+        try {
+            auto h = dbPool_->acquire();
+            pqxx::work txn(h.conn());
+            
+            auto result = txn.exec_params(
+                "UPDATE finalpoo.gcode_routine SET filename = $1, description = $2, gcode_content = $3, file_size = $4 "
+                "WHERE routine_id = $5",
+                filename, description, gcodeContent, static_cast<int>(gcodeContent.size()), routineId
+            );
+            
+            txn.commit();
+            return result.affected_rows() > 0;
+            
+        } catch (const std::exception& e) {
+            std::cerr << "Error updating routine: " << e.what() << std::endl;
+            return false;
+        }
+    }
+    
+    bool deleteRoutine(int routineId) {
+        if (!dbPool_) return false;
+        
+        try {
+            auto h = dbPool_->acquire();
+            pqxx::work txn(h.conn());
+            
+            auto result = txn.exec_params(
+                "DELETE FROM finalpoo.gcode_routine WHERE routine_id = $1", routineId
+            );
+            
+            txn.commit();
+            return result.affected_rows() > 0;
+            
+        } catch (const std::exception& e) {
+            std::cerr << "Error deleting routine: " << e.what() << std::endl;
+            return false;
+        }
+    }
+};
+
+/**
+ * @brief Gestor de rutinas G-code con control de permisos
+ */
+class RoutineManager {
+private:
+    std::shared_ptr<DatabaseManager> dbManager_;
+    
+public:
+    RoutineManager(std::shared_ptr<DatabaseManager> dbMgr) : dbManager_(dbMgr) {}
+    
+    struct RoutineInfo {
+        int id;
+        std::string filename;
+        std::string originalFilename;
+        std::string description;
+        int fileSize;
+        int userId;
+        std::time_t createdAt;
+    };
+    
+    int createRoutine(const std::string& filename, const std::string& originalFilename,
+                     const std::string& description, const std::string& gcodeContent, int userId) {
+        if (!dbManager_) return -1;
+        return dbManager_->createRoutine(filename, originalFilename, description, gcodeContent, userId);
+    }
+    
+    DatabaseManager::Routine* getRoutineById(int routineId, int requestUserId, const std::string& userRole) {
+        if (!dbManager_) return nullptr;
+        
+        auto routine = dbManager_->getRoutineById(routineId);
+        if (!routine) return nullptr;
+        
+        // Admin puede ver todas las rutinas, user solo las propias
+        if (userRole == "ADMIN" || routine->userId == requestUserId) {
+            return routine;
+        }
+        
+        return nullptr; // Sin permisos
+    }
+    
+    std::vector<RoutineInfo> getAllRoutines(int requestUserId, const std::string& userRole) {
+        std::vector<RoutineInfo> result;
+        if (!dbManager_) return result;
+        
+        std::vector<DatabaseManager::Routine> routines;
+        
+        if (userRole == "ADMIN") {
+            // Admin ve todas las rutinas
+            routines = dbManager_->getAllRoutines();
+        } else {
+            // User solo ve sus rutinas
+            routines = dbManager_->getRoutinesByUser(requestUserId);
+        }
+        
+        // Convertir a RoutineInfo (sin contenido G-code para lista)
+        for (const auto& routine : routines) {
+            RoutineInfo info;
+            info.id = routine.id;
+            info.filename = routine.filename;
+            info.originalFilename = routine.originalFilename;
+            info.description = routine.description;
+            info.fileSize = routine.fileSize;
+            info.userId = routine.userId;
+            info.createdAt = routine.createdAt;
+            result.push_back(info);
+        }
+        
+        return result;
+    }
+    
+    bool updateRoutine(int routineId, const std::string& filename, const std::string& description, 
+                      const std::string& gcodeContent, int requestUserId, const std::string& userRole) {
+        if (!dbManager_) return false;
+        
+        // Verificar permisos
+        auto routine = dbManager_->getRoutineById(routineId);
+        if (!routine) return false;
+        
+        // Solo el propietario o admin pueden modificar
+        if (userRole != "ADMIN" && routine->userId != requestUserId) {
+            return false;
+        }
+        
+        return dbManager_->updateRoutine(routineId, filename, description, gcodeContent);
+    }
+    
+    bool deleteRoutine(int routineId, int requestUserId, const std::string& userRole) {
+        if (!dbManager_) return false;
+        
+        // Verificar permisos
+        auto routine = dbManager_->getRoutineById(routineId);
+        if (!routine) return false;
+        
+        // Solo el propietario o admin pueden eliminar
+        if (userRole != "ADMIN" && routine->userId != requestUserId) {
+            return false;
+        }
+        
+        return dbManager_->deleteRoutine(routineId);
+    }
+};
+
+// Clase para manejo de usuarios con sesiones basadas en cookies
+class UserManager {
+private:
+    std::shared_ptr<DatabaseManager> dbManager_;
+    std::random_device rd_;
+    std::mt19937 gen_;
+    
+    // Mapa de sesiones en memoria (con cookies)
+    struct Session {
+        std::string token;
+        int userId;
+        std::time_t createdAt;
+        std::time_t lastAccess;
+        std::string userAgent;
+        std::string ip;
+    };
+    
+    std::unordered_map<std::string, Session> sessions_;
+    
+    std::string generateToken() {
+        std::uniform_int_distribution<> dis(0, 15);
+        std::stringstream ss;
+        for (int i = 0; i < 32; ++i) {
+            ss << std::hex << dis(gen_);
+        }
+        return ss.str();
+    }
+
+public:
+    UserManager(std::shared_ptr<DatabaseManager> dbMgr) : dbManager_(dbMgr), gen_(rd_()) {}
+    
+    struct UserInfo {
+        int id;
+        std::string username;
+        std::string role;
+        bool active;
+        std::time_t createdAt;
+    };
+    
+    std::string login(const std::string& username, const std::string& password, 
+                     const std::string& userAgent = "", const std::string& ip = "") {
+        if (!dbManager_) return "";
+        
+        auto user = dbManager_->authenticateUser(username, password);
+        if (!user) return "";
+        
+        // Crear sesión en memoria con cookie
+        std::string token = generateToken();
+        Session session = {
+            token, user->id, std::time(nullptr), std::time(nullptr), userAgent, ip
+        };
+        sessions_[token] = session;
+        
+        return token;
+    }
+    
+    bool validateToken(const std::string& token) {
+        auto it = sessions_.find(token);
+        if (it != sessions_.end()) {
+            // Actualizar último acceso
+            it->second.lastAccess = std::time(nullptr);
+            return true;
+        }
+        return false;
+    }
+    
+    UserInfo* getUserByToken(const std::string& token) {
+        auto sessionIt = sessions_.find(token);
+        if (sessionIt == sessions_.end()) return nullptr;
+        
+        auto user = dbManager_->getUserById(sessionIt->second.userId);
+        if (!user) return nullptr;
+        
+        static UserInfo userInfo;
+        userInfo.id = user->id;
+        userInfo.username = user->username;
+        userInfo.role = user->role;
+        userInfo.active = user->active;
+        userInfo.createdAt = user->createdAt;
+        
+        return &userInfo;
+    }
+    
+    bool logout(const std::string& token) {
+        return sessions_.erase(token) > 0;
+    }
+    
+    int createUser(const std::string& username, const std::string& password, const std::string& role = "OPERATOR") {
+        if (!dbManager_) return -1;
+        return dbManager_->createUser(username, password, role);
+    }
+    
+    std::vector<UserInfo> getAllUsers() {
+        std::vector<UserInfo> result;
+        if (!dbManager_) return result;
+        
+        auto users = dbManager_->getAllUsers();
+        for (const auto& user : users) {
+            UserInfo info;
+            info.id = user.id;
+            info.username = user.username;
+            info.role = user.role;
+            info.active = user.active;
+            info.createdAt = user.createdAt;
+            result.push_back(info);
+        }
+        
+        return result;
+    }
+    
+    UserInfo* getUserByUsername(const std::string& username) {
+        if (!dbManager_) return nullptr;
+        
+        auto user = dbManager_->getUserByUsername(username);
+        if (!user) return nullptr;
+        
+        static UserInfo userInfo;
+        userInfo.id = user->id;
+        userInfo.username = user->username;
+        userInfo.role = user->role;
+        userInfo.active = user->active;
+        userInfo.createdAt = user->createdAt;
+        
+        return &userInfo;
+    }
+    
+    bool updateUser(int userId, const std::string& newUsername, const std::string& newRole) {
+        if (!dbManager_) return false;
+        return dbManager_->updateUser(userId, newUsername, newRole);
+    }
+    
+    bool updateUserPassword(const std::string& username, const std::string& newPassword) {
+        if (!dbManager_) return false;
+        return dbManager_->updateUserPassword(username, newPassword);
+    }
+    
+    bool deleteUser(int userId) {
+        if (!dbManager_) return false;
+        
+        // Invalidar todas las sesiones del usuario que se va a eliminar
+        for (auto it = sessions_.begin(); it != sessions_.end();) {
+            if (it->second.userId == userId) {
+                it = sessions_.erase(it);
+            } else {
+                ++it;
+            }
+        }
+        
+        return dbManager_->deleteUser(userId);
+    }
+    
+    bool deleteUser(const std::string& username) {
+        if (!dbManager_) return false;
+        
+        // Obtener el usuario para saber su ID
+        auto user = dbManager_->getUserByUsername(username);
+        if (!user) return false;
+        
+        return deleteUser(user->id);
+    }
+    
+    // Limpiar sesiones expiradas (llamar periódicamente)
+    void cleanExpiredSessions(int maxAgeHours = 24) {
+        std::time_t now = std::time(nullptr);
+        std::time_t maxAge = maxAgeHours * 3600;
+        
+        for (auto it = sessions_.begin(); it != sessions_.end();) {
+            if ((now - it->second.lastAccess) > maxAge) {
+                it = sessions_.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+};
+
+/**
+ * @brief Método XML-RPC para login de usuarios
+ */
+class AuthLoginMethod : public ServiceMethod {
+private:
+    std::shared_ptr<UserManager> userManager_;
+    
+public:
+    AuthLoginMethod(XmlRpc::XmlRpcServer* srv, std::shared_ptr<UserManager> userMgr)
+        : ServiceMethod("authLogin", "Autenticación de usuarios", srv), userManager_(userMgr) {}
+    
+    void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
+        if (params.size() != 2) {
+            throw XmlRpc::XmlRpcException("authLogin requiere 2 parámetros: username, password");
+        }
+        
+        std::string username = params[0];
+        std::string password = params[1];
+        
+        try {
+            std::string token = userManager_->login(username, password);
+            
+            if (token.empty()) {
+                result["success"] = false;
+                result["message"] = "Credenciales inválidas";
+                return;
+            }
+            
+            auto userInfo = userManager_->getUserByToken(token);
+            if (!userInfo) {
+                result["success"] = false;
+                result["message"] = "Error interno del servidor";
+                return;
+            }
+            
+            result["success"] = true;
+            result["token"] = token;
+            result["user"]["id"] = userInfo->id;
+            result["user"]["username"] = userInfo->username;
+            result["user"]["role"] = userInfo->role;
+            result["user"]["active"] = userInfo->active;
+            
+        } catch (const std::exception& e) {
+            result["success"] = false;
+            result["message"] = std::string("Error de login: ") + e.what();
+        }
+    }
+};
+
+/**
+ * @brief Método XML-RPC para logout de usuarios
+ */
+class AuthLogoutMethod : public ServiceMethod {
+private:
+    std::shared_ptr<UserManager> userManager_;
+    
+public:
+    AuthLogoutMethod(XmlRpc::XmlRpcServer* srv, std::shared_ptr<UserManager> userMgr)
+        : ServiceMethod("authLogout", "Logout de usuarios", srv), userManager_(userMgr) {}
+    
+    void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
+        if (params.size() != 1) {
+            throw XmlRpc::XmlRpcException("authLogout requiere 1 parámetro: token");
+        }
+        
+        std::string token = params[0];
+        
+        try {
+            bool success = userManager_->logout(token);
+            result["success"] = success;
+            result["message"] = success ? "Logout exitoso" : "Token no encontrado";
+            
+        } catch (const std::exception& e) {
+            result["success"] = false;
+            result["message"] = std::string("Error de logout: ") + e.what();
+        }
+    }
+};
+
+/**
+ * @brief Método XML-RPC para crear usuarios
+ */
+class UserCreateMethod : public ServiceMethod {
+private:
+    std::shared_ptr<UserManager> userManager_;
+    
+public:
+    UserCreateMethod(XmlRpc::XmlRpcServer* srv, std::shared_ptr<UserManager> userMgr)
+        : ServiceMethod("userCreate", "Crear nuevo usuario", srv), userManager_(userMgr) {}
+    
+    void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
+        if (params.size() != 4) {
+            throw XmlRpc::XmlRpcException("userCreate requiere 4 parámetros: token, username, password, role");
+        }
+        
+        std::string token = params[0];
+        std::string username = params[1];
+        std::string password = params[2];
+        std::string role = params[3];
+        
+        try {
+            // Verificar token y permisos
+            if (!userManager_->validateToken(token)) {
+                result["success"] = false;
+                result["message"] = "Token inválido";
+                return;
+            }
+            
+            auto currentUser = userManager_->getUserByToken(token);
+            if (!currentUser || currentUser->role != "ADMIN") {
+                result["success"] = false;
+                result["message"] = "Permisos insuficientes";
+                return;
+            }
+            
+            int userId = userManager_->createUser(username, password, role);
+            
+            if (userId > 0) {
+                result["success"] = true;
+                result["userId"] = userId;
+                result["message"] = "Usuario creado exitosamente";
+            } else {
+                result["success"] = false;
+                result["message"] = "Error creando usuario (posiblemente ya existe)";
+            }
+            
+        } catch (const std::exception& e) {
+            result["success"] = false;
+            result["message"] = std::string("Error: ") + e.what();
+        }
+    }
+};
+
+/**
+ * @brief Método XML-RPC para listar usuarios
+ */
+class UserListMethod : public ServiceMethod {
+private:
+    std::shared_ptr<UserManager> userManager_;
+    
+public:
+    UserListMethod(XmlRpc::XmlRpcServer* srv, std::shared_ptr<UserManager> userMgr)
+        : ServiceMethod("userList", "Listar usuarios", srv), userManager_(userMgr) {}
+    
+    void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
+        if (params.size() != 1) {
+            throw XmlRpc::XmlRpcException("userList requiere 1 parámetro: token");
+        }
+        
+        std::string token = params[0];
+        
+        try {
+            // Verificar token y permisos
+            if (!userManager_->validateToken(token)) {
+                result["success"] = false;
+                result["message"] = "Token inválido";
+                return;
+            }
+            
+            auto currentUser = userManager_->getUserByToken(token);
+            if (!currentUser || currentUser->role != "ADMIN") {
+                result["success"] = false;
+                result["message"] = "Permisos insuficientes";
+                return;
+            }
+            
+            auto users = userManager_->getAllUsers();
+            
+            result["success"] = true;
+            result["users"].setSize(users.size());
+            
+            for (size_t i = 0; i < users.size(); ++i) {
+                result["users"][i]["id"] = users[i].id;
+                result["users"][i]["username"] = users[i].username;
+                result["users"][i]["role"] = users[i].role;
+                result["users"][i]["active"] = users[i].active;
+                result["users"][i]["createdAt"] = static_cast<int>(users[i].createdAt);
+            }
+            
+        } catch (const std::exception& e) {
+            result["success"] = false;
+            result["message"] = std::string("Error: ") + e.what();
+        }
+    }
+};
+
+/**
+ * @brief Método XML-RPC para obtener información de usuario
+ */
+class UserInfoMethod : public ServiceMethod {
+private:
+    std::shared_ptr<UserManager> userManager_;
+    
+public:
+    UserInfoMethod(XmlRpc::XmlRpcServer* srv, std::shared_ptr<UserManager> userMgr)
+        : ServiceMethod("userInfo", "Información de usuario", srv), userManager_(userMgr) {}
+    
+    void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
+        if (params.size() != 2) {
+            throw XmlRpc::XmlRpcException("userInfo requiere 2 parámetros: token, username");
+        }
+        
+        std::string token = params[0];
+        std::string username = params[1];
+        
+        try {
+            // Verificar token
+            if (!userManager_->validateToken(token)) {
+                result["success"] = false;
+                result["message"] = "Token inválido";
+                return;
+            }
+            
+            auto userInfo = userManager_->getUserByUsername(username);
+            if (!userInfo) {
+                result["success"] = false;
+                result["message"] = "Usuario no encontrado";
+                return;
+            }
+            
+            result["success"] = true;
+            result["user"]["id"] = userInfo->id;
+            result["user"]["username"] = userInfo->username;
+            result["user"]["role"] = userInfo->role;
+            result["user"]["active"] = userInfo->active;
+            result["user"]["createdAt"] = static_cast<int>(userInfo->createdAt);
+            
+        } catch (const std::exception& e) {
+            result["success"] = false;
+            result["message"] = std::string("Error: ") + e.what();
+        }
+    }
+};
+
+/**
+ * @brief Método XML-RPC para actualizar usuario
+ */
+class UserUpdateMethod : public ServiceMethod {
+private:
+    std::shared_ptr<UserManager> userManager_;
+    
+public:
+    UserUpdateMethod(XmlRpc::XmlRpcServer* srv, std::shared_ptr<UserManager> userMgr)
+        : ServiceMethod("userUpdate", "Actualizar usuario", srv), userManager_(userMgr) {}
+    
+    void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
+        if (params.size() != 3) {
+            throw XmlRpc::XmlRpcException("userUpdate requiere 3 parámetros: token, username, updates");
+        }
+        
+        std::string token = params[0];
+        std::string username = params[1];
+        XmlRpc::XmlRpcValue updates = params[2];
+        
+        try {
+            // Verificar token y permisos
+            if (!userManager_->validateToken(token)) {
+                result["success"] = false;
+                result["message"] = "Token inválido";
+                return;
+            }
+            
+            auto currentUser = userManager_->getUserByToken(token);
+            if (!currentUser || currentUser->role != "ADMIN") {
+                result["success"] = false;
+                result["message"] = "Permisos insuficientes";
+                return;
+            }
+            
+            // No permitir actualizar admin
+            if (username == "admin") {
+                result["success"] = false;
+                result["message"] = "No se puede modificar el usuario admin";
+                return;
+            }
+            
+            bool success = false;
+            std::string message = "Usuario actualizado exitosamente";
+            
+            // Actualizar password si se proporciona
+            if (updates.hasMember("password")) {
+                std::string newPassword = updates["password"];
+                success = userManager_->updateUserPassword(username, newPassword);
+                if (!success) {
+                    message = "Error actualizando contraseña";
+                }
+            }
+            
+            // Actualizar username y role si se proporcionan
+            if (updates.hasMember("newUsername") || updates.hasMember("role")) {
+                auto userInfo = userManager_->getUserByUsername(username);
+                if (userInfo) {
+                    std::string newUsername = updates.hasMember("newUsername") ? 
+                                            std::string(updates["newUsername"]) : userInfo->username;
+                    std::string newRole = updates.hasMember("role") ? 
+                                        std::string(updates["role"]) : userInfo->role;
+                    
+                    success = userManager_->updateUser(userInfo->id, newUsername, newRole);
+                    if (!success) {
+                        message = "Error actualizando información del usuario";
+                    }
+                }
+            }
+            
+            result["success"] = success;
+            result["message"] = message;
+            
+        } catch (const std::exception& e) {
+            result["success"] = false;
+            result["message"] = std::string("Error: ") + e.what();
+        }
+    }
+};
+
+/**
+ * @brief Método XML-RPC para eliminar usuario
+ */
+class UserDeleteMethod : public ServiceMethod {
+private:
+    std::shared_ptr<UserManager> userManager_;
+    
+public:
+    UserDeleteMethod(XmlRpc::XmlRpcServer* srv, std::shared_ptr<UserManager> userMgr)
+        : ServiceMethod("userDelete", "Eliminar usuario", srv), userManager_(userMgr) {}
+    
+    void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
+        if (params.size() != 2) {
+            throw XmlRpc::XmlRpcException("userDelete requiere 2 parámetros: token, username");
+        }
+        
+        std::string token = params[0];
+        std::string username = params[1];
+        
+        try {
+            // Verificar token y permisos
+            if (!userManager_->validateToken(token)) {
+                result["success"] = false;
+                result["message"] = "Token inválido";
+                return;
+            }
+            
+            auto currentUser = userManager_->getUserByToken(token);
+            if (!currentUser || currentUser->role != "ADMIN") {
+                result["success"] = false;
+                result["message"] = "Permisos insuficientes";
+                return;
+            }
+            
+            // No permitir eliminar admin
+            if (username == "admin") {
+                result["success"] = false;
+                result["message"] = "No se puede eliminar el usuario admin";
+                return;
+            }
+            
+            bool success = userManager_->deleteUser(username);
+            
+            result["success"] = success;
+            result["message"] = success ? "Usuario eliminado exitosamente" : "Error eliminando usuario";
+            
+        } catch (const std::exception& e) {
+            result["success"] = false;
+            result["message"] = std::string("Error: ") + e.what();
+        }
+    }
+};
+
+/**
+ * @brief Implementación del método initializeAuthMethods() para ServerModel
+ */
+inline void ServerModel::initializeAuthMethods() {
+    try {
+        // Métodos de autenticación y usuarios
+        methods.push_back(std::make_unique<AuthLoginMethod>(server.get(), userManager_));
+        methods.push_back(std::make_unique<AuthLogoutMethod>(server.get(), userManager_));
+        methods.push_back(std::make_unique<UserCreateMethod>(server.get(), userManager_));
+        methods.push_back(std::make_unique<UserListMethod>(server.get(), userManager_));
+        methods.push_back(std::make_unique<UserInfoMethod>(server.get(), userManager_));
+        methods.push_back(std::make_unique<UserUpdateMethod>(server.get(), userManager_));
+        methods.push_back(std::make_unique<UserDeleteMethod>(server.get(), userManager_));
+    } catch (const std::exception& e) {
+        throw ServerInitializationException("Falló la inicialización de métodos de autenticación: " + std::string(e.what()));
+    }
 }
 
 } // namespace RPCServer

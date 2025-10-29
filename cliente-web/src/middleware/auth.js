@@ -3,7 +3,6 @@ if (!req.session?.token) return res.redirect("/login");
 next();
 }
 
-
 export function requireRole(role) {
 return (req, res, next) => {
 const roles = req.session?.roles || [];

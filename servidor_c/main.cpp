@@ -18,16 +18,15 @@ int main() {
 
         pqxx::work tx{h.conn()};
         pqxx::result r = tx.exec_params(
-            "INSERT INTO finalpoo.usuario (nombre, email, contrasena) VALUES ($1, $2, $3) RETURNING id, nombre, email, contrasena;",
-            "Maria Gomez", "maria.gomez@example.com", "password456"
+            "INSERT INTO finalpoo.usuario (username, password, rol) VALUES ($1, $2, $3) RETURNING id, username, rol;",
+            "testuser", "testpass123", "OPERATOR"
         );
 
         for (auto const& row : r) {
             int id = row[0].as<int>();
-            std::string nombre = row[1].as<std::string>();
-            std::string email = row[2].as<std::string>();
-            std::string contrasena = row[3].as<std::string>();
-            std::cout << "Row: id=" << id << ", nombre=" << nombre << ", email=" << email << ", contrasena=" << contrasena << "\n";
+            std::string username = row[1].as<std::string>();
+            std::string rol = row[2].as<std::string>();
+            std::cout << "Row: id=" << id << ", username=" << username << ", rol=" << rol << "\n";
         }
 
         tx.commit();

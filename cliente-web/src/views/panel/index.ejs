@@ -1,35 +1,134 @@
-<section class="grid">
-    <div class="card">
-        <h3>Status</h3>
-        <% if (error) { %>
-            <div class="error"><%= error %></div>
-        <% } else if (status) { %>
-            <pre><%= JSON.stringify(status, null, 2) %></pre>
-        <% } else { %>
-            <p>No status available.</p>
-        <% } %>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2>Panel de Control del Robot</h2>
+            
+            <!-- Enlaces de navegación para administradores -->
+            <% if (typeof user !== 'undefined' && user && user.roles && user.roles.includes('ADMIN')) { %>
+            <div class="mb-3">
+                <a href="/panel/users" class="btn btn-outline-primary">
+                    <i class="bi bi-people"></i> Gestión de Usuarios
+                </a>
+            </div>
+            <% } %>
+        </div>
     </div>
 
-    <div class="card">
-        <h3>Controls</h3>
-        <form method="post" action="/homing">
-            <button type="submit">Homing</button>
-        </form>
-        <form method="post" action="/motors">
-            <input type="hidden" name="on" value="1">
-            <button type="submit">Motors ON</button>
-        </form>
-        <form method="post" action="/motors">
-            <input type="hidden" name="on" value="0">
-            <button type="submit">Motors OFF</button>
-        </form>
-        <form method="post" action="/gripper">
-            <input type="hidden" name="on" value="1">
-            <button type="submit">Gripper ON</button>
-        </form>
-        <form method="post" action="/gripper">
-            <input type="hidden" name="on" value="0">
-            <button type="submit">Gripper OFF</button>
-        </form>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-info-circle"></i> Estado del Sistema</h5>
+                </div>
+                <div class="card-body">
+                    <% if (error) { %>
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle"></i> <%= error %>
+                        </div>
+                    <% } else if (status) { %>
+                        <div class="row">
+                            <div class="col-6">
+                                <strong>Modo:</strong> <%= status.mode || 'N/A' %>
+                            </div>
+                            <div class="col-6">
+                                <strong>Info:</strong> <%= status.info || 'N/A' %>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-6">
+                                <strong>Motores:</strong> 
+                                <span class="badge <%= status.motorsOn ? 'bg-success' : 'bg-secondary' %>">
+                                    <%= status.motorsOn ? 'ENCENDIDOS' : 'APAGADOS' %>
+                                </span>
+                            </div>
+                            <div class="col-6">
+                                <strong>Gripper:</strong>
+                                <span class="badge <%= status.gripperOn ? 'bg-success' : 'bg-secondary' %>">
+                                    <%= status.gripperOn ? 'ABIERTO' : 'CERRADO' %>
+                                </span>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-12">
+                                <strong>Posición:</strong>
+                                <% if (status.position) { %>
+                                    X: <%= status.position.x || 0 %>, 
+                                    Y: <%= status.position.y || 0 %>, 
+                                    Z: <%= status.position.z || 0 %>
+                                <% } else { %>
+                                    No disponible
+                                <% } %>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <p class="text-muted">No hay información de estado disponible.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-joystick"></i> Controles</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <form method="post" action="/homing" class="d-inline">
+                                <button type="submit" class="btn btn-warning w-100">
+                                    <i class="bi bi-house"></i> Homing
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-6">
+                            <a href="/robot/move" class="btn btn-primary w-100">
+                                <i class="bi bi-arrows-move"></i> Mover Robot
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <form method="post" action="/motors" class="d-inline">
+                                <input type="hidden" name="on" value="1">
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="bi bi-power"></i> Motores ON
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-6">
+                            <form method="post" action="/motors" class="d-inline">
+                                <input type="hidden" name="on" value="0">
+                                <button type="submit" class="btn btn-outline-danger w-100">
+                                    <i class="bi bi-power"></i> Motores OFF
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <form method="post" action="/gripper" class="d-inline">
+                                <input type="hidden" name="on" value="1">
+                                <button type="submit" class="btn btn-info w-100">
+                                    <i class="bi bi-gear"></i> Gripper ON
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-6">
+                            <form method="post" action="/gripper" class="d-inline">
+                                <input type="hidden" name="on" value="0">
+                                <button type="submit" class="btn btn-outline-secondary w-100">
+                                    <i class="bi bi-gear"></i> Gripper OFF
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</section>
+</div>

@@ -26,9 +26,21 @@ private:
         std::cout << "=== Servidor RPC Iniciado ===" << std::endl;
         std::cout << "Puerto: " << model->getPort() << std::endl;
         std::cout << "Métodos disponibles:" << std::endl;
-        std::cout << "  - ServerTest: Prueba de conexión" << std::endl;
-        std::cout << "  - Eco: Echo con saludo personalizado" << std::endl;
-        std::cout << "  - Sumar: Suma de números reales" << std::endl;
+        std::cout << "  Básicos:" << std::endl;
+        std::cout << "    - ServerTest: Prueba de conexión" << std::endl;
+        std::cout << "    - Eco: Echo con saludo personalizado" << std::endl;
+        std::cout << "    - Sumar: Suma de números reales" << std::endl;
+        std::cout << "  Autenticación:" << std::endl;
+        std::cout << "    - authLogin: Login de usuarios" << std::endl;
+        std::cout << "    - authLogout: Logout de usuarios" << std::endl;
+        std::cout << "  Gestión de usuarios:" << std::endl;
+        std::cout << "    - userCreate: Crear nuevo usuario" << std::endl;
+        std::cout << "    - userList: Listar usuarios" << std::endl;
+        std::cout << "    - userInfo: Información de usuario" << std::endl;
+        std::cout << "    - userUpdate: Actualizar usuario" << std::endl;
+        std::cout << "    - userDelete: Eliminar usuario" << std::endl;
+        std::cout << "  Robot:" << std::endl;
+        std::cout << "    - Métodos de control del robot arm" << std::endl;
         std::cout << "Presione Ctrl+C para detener el servidor" << std::endl;
         std::cout << "==============================" << std::endl;
     }

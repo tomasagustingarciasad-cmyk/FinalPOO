@@ -2,3 +2,9 @@ cliente-web/node_modules
 *.o
 *.so
 *.dSYM
+node_modules/
+servidor/servidor_rpc
+*.out
+.venv/
+.vscode/
+__pycache__/
