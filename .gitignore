@@ -1,2 +1,5 @@
 cliente-web/node_modules
-
+*.o
+*.so
+*.dSYM
+servidor/servidor

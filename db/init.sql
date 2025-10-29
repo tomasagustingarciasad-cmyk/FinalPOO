@@ -1,10 +1,19 @@
 CREATE SCHEMA IF NOT EXISTS finalpoo;
+CREATE TABLE IF NOT EXISTS finalpoo.rol(
+    id SERIAL PRIMARY KEY,
+    rol VARCHAR(50) UNIQUE NOT NULL
+);
 CREATE TABLE IF NOT EXISTS finalpoo.usuario (
     id SERIAL PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    contrasena VARCHAR(100) NOT NULL
+    name VARCHAR(100) NOT NULL,
+    rol VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    CONSTRAINT fk_rol FOREIGN KEY (rol) REFERENCES finalpoo.rol (rol)
 );
 
-INSERT INTO finalpoo.usuario (nombre, email, contrasena) VALUES
-('Juan Perez', 'juan.perez@example.com', 'password123');
+INSERT INTO finalpoo.rol (rol) VALUES
+('admin'),
+('user');
+
+INSERT INTO finalpoo.usuario (name, rol, password) VALUES
+('Juan Perez', 'admin', 'password123');

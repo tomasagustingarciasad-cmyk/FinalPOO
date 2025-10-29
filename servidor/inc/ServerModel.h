@@ -10,6 +10,10 @@
 
 namespace RPCServer {
 
+// Forward declarations
+class ServiceMethod;
+class Robot;
+
 /**
  * @brief Modelo de datos de configuración del servidor
  */
@@ -292,26 +296,21 @@ public:
         robot_ = std::make_unique<Robot>(); // inicializar robot
         initializeMethods();
     }
- // Declaración de helper para registrar métodos del Robot (definido más abajo)
-    friend inline void registerRobotMethods(XmlRpc::XmlRpcServer*,
-        std::vector<std::unique_ptr<ServiceMethod>>&,
-        Robot*);
-    
     void initializeMethods() {
         try {
             methods.push_back(std::make_unique<ServerTestMethod>(server.get()));
             methods.push_back(std::make_unique<EchoMethod>(server.get()));
             methods.push_back(std::make_unique<SumMethod>(server.get()));
             // Métodos del Robot (UML ServidorRPC)
-           methods.push_back(std::make_unique<ConnectRobotMethod>(server.get(), robot_.get()));
-           methods.push_back(std::make_unique<DisconnectRobotMethod>(server.get(), robot_.get()));
-           methods.push_back(std::make_unique<SetModeMethod>(server.get(), robot_.get()));
-           methods.push_back(std::make_unique<EnableMotorsMethod>(server.get(), robot_.get()));
-           methods.push_back(std::make_unique<HomeMethod>(server.get(), robot_.get()));
-           methods.push_back(std::make_unique<MoveMethod>(server.get(), robot_.get()));
-           methods.push_back(std::make_unique<EndEffectorMethod>(server.get(), robot_.get()));
-           methods.push_back(std::make_unique<GetPositionMethod>(server.get(), robot_.get()));
-           methods.push_back(std::make_unique<GetEndstopsMethod>(server.get(), robot_.get()));
+            methods.push_back(std::make_unique<ConnectRobotMethod>(server.get(), robot_.get()));
+            methods.push_back(std::make_unique<DisconnectRobotMethod>(server.get(), robot_.get()));
+            methods.push_back(std::make_unique<SetModeMethod>(server.get(), robot_.get()));
+            methods.push_back(std::make_unique<EnableMotorsMethod>(server.get(), robot_.get()));
+            methods.push_back(std::make_unique<HomeMethod>(server.get(), robot_.get()));
+            methods.push_back(std::make_unique<MoveMethod>(server.get(), robot_.get()));
+            methods.push_back(std::make_unique<EndEffectorMethod>(server.get(), robot_.get()));
+            methods.push_back(std::make_unique<GetPositionMethod>(server.get(), robot_.get()));
+            methods.push_back(std::make_unique<GetEndstopsMethod>(server.get(), robot_.get()));
         } catch (const std::exception& e) {
             throw ServerInitializationException("Falló la inicialización de métodos: " + std::string(e.what()));
         }
@@ -352,8 +351,6 @@ public:
     bool getIsRunning() const { return isRunning; }
     int getPort() const { return config->getPort(); }
 };
-
-// Helper: no es necesario, los métodos se registran directamente en initializeMethods
 
 } // namespace RPCServer
 
