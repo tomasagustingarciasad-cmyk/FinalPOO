@@ -8,7 +8,7 @@
 #define USE_UNO false
 // Para usar en Modo SIMULATION
 #define USE_ESP8266 false // ponlo en true SOLO si compilas para ESP8266 y tienes el core instalado
-#define SIMULATION true // util para todas las placas (desactiva pin/read/write)
+#define SIMULATION false // ← CAMBIADO: modo hardware real para actualizar coordenadas
 
 //ROBOT ARM LENGTH
 //#define SHANK_LENGTH 140.0
@@ -33,10 +33,10 @@
 #define E0_HOME_STEPS 0 // STEPS FROM E0_ENDSTOP TO INITIAL_E0
 
 //HOMING SETTINGS:
-#define HOME_X_STEPPER true // "true" IF ENDSTOP IS INSTALLED
-#define HOME_Y_STEPPER true // "true" IF ENDSTOP IS INSTALLED
-#define HOME_Z_STEPPER true // "true" IF ENDSTOP IS INSTALLED
-#define HOME_E0_STEPPER false // "true" IF ENDSTOP IS INSTALLED
+#define HOME_X_STEPPER false // ← CAMBIADO: sin endstops físicos
+#define HOME_Y_STEPPER false // ← CAMBIADO: sin endstops físicos  
+#define HOME_Z_STEPPER false // ← CAMBIADO: sin endstops físicos
+#define HOME_E0_STEPPER false // ← CAMBIADO: sin endstops físicos
 #define HOME_ON_BOOT false // "true" IF HOMING REQUIRED AFTER POWER ON
 #define HOME_DWELL 1400 // INCREASE TO SLOW DOWN HOMING SPEED
 

@@ -310,6 +310,17 @@ void setStepperEnable(bool enable){
 void homeSequence(){
   setStepperEnable(false);
   fan.enable(true);
+  
+  // Si NO hay endstops físicos configurados, inicializar directamente
+  if (!HOME_X_STEPPER && !HOME_Y_STEPPER && !HOME_Z_STEPPER && !HOME_E0_STEPPER) {
+    setStepperEnable(true);
+    // Usar setCurrentPos() para establecer inmediatamente las coordenadas iniciales
+    interpolator.setCurrentPos(INITIAL_X, INITIAL_Y, INITIAL_Z, INITIAL_E0);
+    Logger::logINFO("HOMING COMPLETE - POSITION SET TO INITIAL");
+    return; // Salir temprano sin chequeos de endstops
+  }
+  
+  // Lógica original para endstops físicos
   if (!HOME_Y_STEPPER || !HOME_X_STEPPER){
     setStepperEnable(true);
     endstopY.homeOffset(!INVERSE_Y_STEPPER);

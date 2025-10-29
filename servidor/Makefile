@@ -2,11 +2,9 @@
 # Author: Generated for POO TP2 Req4
 
 # Compiler and flags
--CXXFLAGS = -std=c++14 -Wall -Wextra -g -O2
-+CXXFLAGS = -std=c++14 -Wall -Wextra -g -O2 -pthread
- INCLUDES = -I./inc -I./lib
--LDFLAGS = 
-+LDFLAGS = -pthread
+CXXFLAGS = -std=c++14 -Wall -Wextra -g -O2 -pthread
+INCLUDES = -I./inc -I./lib
+LDFLAGS = -pthread
 
 # XML-RPC library source files
 XMLRPC_SOURCES = lib/XmlRpcClient.cpp \
