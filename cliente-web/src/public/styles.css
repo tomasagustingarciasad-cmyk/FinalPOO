@@ -3,7 +3,9 @@
 body{ margin:0; font-family:system-ui,Segoe UI,Roboto,Ubuntu; background:var(--bg); color:var(--fg); }
 .container{ max-width:1080px; margin:0 auto; padding:1rem; }
 .topbar{ display:flex; justify-content:space-between; align-items:center; padding:0.75rem 1rem; background:#0b0d13; border-bottom:1px solid #1e2230; }
-.topbar a{ color:var(--fg); margin-right:1rem; text-decoration:none; }
+.topbar nav{ display:flex; align-items:center; gap:1rem; }
+.topbar a{ color:var(--fg); text-decoration:none; padding:0.5rem 1rem; border-radius:6px; transition:background-color 0.2s; }
+.topbar a:hover{ background:#1e2230; }
 .grid{ display:grid; grid-template-columns: 1fr 1fr; gap:1rem; }
 .card{ background:var(--card); border:1px solid #1e2230; border-radius:14px; padding:1rem; }
 .form label{ display:block; margin:.5rem 0; }

@@ -1,0 +1,457 @@
+<div class="page-header">
+    <h2>✏️ Editar Rutina: <%= routine.filename %></h2>
+    <div class="actions">
+        <a href="/routines/<%= routine.id %>" class="btn btn-secondary">🔙 Volver a Rutina</a>
+        <a href="/routines" class="btn btn-secondary">📋 Lista de Rutinas</a>
+    </div>
+</div>
+
+<% if (locals.error) { %>
+    <div class="alert alert-error">
+        <strong>❌ Error:</strong> <%= error %>
+    </div>
+<% } %>
+
+<div class="form-container">
+    <form method="post" action="/routines/<%= routine.id %>" enctype="multipart/form-data" class="routine-form">
+        <div class="current-info">
+            <h3>📋 Información Actual</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Archivo actual:</label>
+                    <value><%= routine.filename %></value>
+                </div>
+                <div class="info-item">
+                    <label>Tamaño:</label>
+                    <value><%= Math.round(routine.fileSize / 1024 * 100) / 100 %> KB</value>
+                </div>
+                <div class="info-item">
+                    <label>Creada:</label>
+                    <value><%= new Date(routine.createdAt * 1000).toLocaleString('es-ES') %></value>
+                </div>
+            </div>
+        </div>
+
+        <div class="edit-section">
+            <h3>✏️ Editar Información</h3>
+            
+            <div class="form-group">
+                <label for="filename">Nombre del archivo:</label>
+                <input type="text" 
+                       id="filename" 
+                       name="filename" 
+                       value="<%= routine.filename %>"
+                       required
+                       class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="description">Descripción:</label>
+                <textarea id="description" 
+                          name="description" 
+                          class="form-control"
+                          rows="3"><%= routine.description || '' %></textarea>
+            </div>
+        </div>
+
+        <div class="upload-section">
+            <h3>📁 Reemplazar con Nuevo Archivo (Opcional)</h3>
+            <div class="file-upload">
+                <input type="file" 
+                       id="gcodeFile" 
+                       name="gcodeFile" 
+                       accept=".gcode,.nc,.g,.txt"
+                       class="file-input">
+                <label for="gcodeFile" class="file-label">
+                    <span class="file-icon">📄</span>
+                    <span class="file-text">Seleccionar nuevo archivo G-code</span>
+                </label>
+                <p class="file-help">Si no seleccionas un archivo, se mantendrá el contenido actual</p>
+            </div>
+        </div>
+
+        <div class="code-section">
+            <h3>📝 Contenido G-code</h3>
+            <div class="form-group">
+                <label for="gcodeContent">Código G-code:</label>
+                <textarea id="gcodeContent" 
+                          name="gcodeContent" 
+                          class="form-control code-editor"
+                          rows="20"
+                          required><%= routine.gcodeContent %></textarea>
+            </div>
+
+            <div class="code-stats">
+                <span class="line-count">Líneas: <span id="lineCount"><%= routine.gcodeContent.split('\n').length %></span></span>
+                <span class="char-count">Caracteres: <span id="charCount"><%= routine.gcodeContent.length %></span></span>
+            </div>
+
+            <div class="gcode-help">
+                <h4>💡 Comandos G-code útiles:</h4>
+                <div class="help-buttons">
+                    <button type="button" onclick="insertGcode('G28 ; Home all axes')" class="help-btn">Home (G28)</button>
+                    <button type="button" onclick="insertGcode('G1 X0 Y0 Z0 F3000 ; Move to origin')" class="help-btn">Mover a origen</button>
+                    <button type="button" onclick="insertGcode('G1 Z5 F3000 ; Lift Z')" class="help-btn">Levantar Z</button>
+                    <button type="button" onclick="insertGcode('M106 S255 ; Gripper ON')" class="help-btn">Gripper ON</button>
+                    <button type="button" onclick="insertGcode('M107 ; Gripper OFF')" class="help-btn">Gripper OFF</button>
+                    <button type="button" onclick="insertGcode('G4 P1000 ; Wait 1 second')" class="help-btn">Pausa 1s</button>
+                    <button type="button" onclick="insertGcode('M84 ; Disable steppers')" class="help-btn">Desactivar motores</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">💾 Guardar Cambios</button>
+            <a href="/routines/<%= routine.id %>" class="btn btn-secondary">❌ Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.page-header h2 {
+    margin: 0;
+    color: #333;
+    word-break: break-word;
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.alert {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 5px;
+    border: 1px solid;
+}
+
+.alert-error {
+    background-color: #fee;
+    border-color: #fcc;
+    color: #c00;
+}
+
+.form-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.routine-form {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.current-info, .edit-section, .upload-section, .code-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.current-info:last-child, .edit-section:last-child, .upload-section:last-child, .code-section:last-child {
+    border-bottom: none;
+}
+
+.current-info h3, .edit-section h3, .upload-section h3, .code-section h3 {
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.info-item {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 4px;
+    border-left: 3px solid #007bff;
+}
+
+.info-item label {
+    display: block;
+    font-weight: 500;
+    color: #666;
+    margin-bottom: 0.25rem;
+}
+
+.info-item value {
+    color: #333;
+}
+
+.file-upload {
+    text-align: center;
+    padding: 2rem;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    transition: border-color 0.2s;
+}
+
+.file-upload:hover {
+    border-color: #007bff;
+}
+
+.file-input {
+    display: none;
+}
+
+.file-label {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    color: #666;
+    transition: color 0.2s;
+}
+
+.file-label:hover {
+    color: #007bff;
+}
+
+.file-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.file-text {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.file-help {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.code-editor {
+    font-family: 'Courier New', monospace;
+    background-color: #f8f9fa;
+    line-height: 1.4;
+    resize: vertical;
+}
+
+.code-stats {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.line-count, .char-count {
+    background: #f0f0f0;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.gcode-help {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 6px;
+    margin-top: 1rem;
+}
+
+.gcode-help h4 {
+    margin: 0 0 1rem 0;
+    color: #333;
+}
+
+.help-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.help-btn {
+    background: #e9ecef;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.help-btn:hover {
+    background: #dee2e6;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #545b62;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .actions {
+        justify-content: center;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .help-buttons {
+        justify-content: center;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+}
+</style>
+
+<script>
+// Manejar la selección de archivo
+document.getElementById('gcodeFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const label = document.querySelector('.file-text');
+        label.textContent = file.name;
+        
+        // Leer el archivo y reemplazar el contenido del textarea
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('gcodeContent').value = e.target.result;
+            updateStats();
+        };
+        reader.readAsText(file);
+    }
+});
+
+// Actualizar estadísticas de líneas y caracteres
+function updateStats() {
+    const content = document.getElementById('gcodeContent').value;
+    const lines = content.split('\n').length;
+    const chars = content.length;
+    
+    document.getElementById('lineCount').textContent = lines;
+    document.getElementById('charCount').textContent = chars;
+}
+
+// Insertar código G-code común
+function insertGcode(code) {
+    const textarea = document.getElementById('gcodeContent');
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    
+    // Insertar el código en la posición del cursor
+    const before = text.substring(0, start);
+    const after = text.substring(end);
+    
+    // Agregar nueva línea si no está al final de una línea
+    const prefix = (before && !before.endsWith('\n')) ? '\n' : '';
+    const suffix = '\n';
+    
+    textarea.value = before + prefix + code + suffix + after;
+    
+    // Posicionar el cursor después del texto insertado
+    const newPos = start + prefix.length + code.length + suffix.length;
+    textarea.setSelectionRange(newPos, newPos);
+    textarea.focus();
+    
+    updateStats();
+}
+
+// Actualizar estadísticas al escribir
+document.getElementById('gcodeContent').addEventListener('input', updateStats);
+
+// Validar formulario
+document.querySelector('.routine-form').addEventListener('submit', function(e) {
+    const content = document.getElementById('gcodeContent').value.trim();
+    const filename = document.getElementById('filename').value.trim();
+    
+    if (!content || !filename) {
+        e.preventDefault();
+        alert('El nombre del archivo y el contenido G-code son obligatorios.');
+        return false;
+    }
+    
+    return true;
+});
+
+// Inicializar estadísticas
+updateStats();
+</script>

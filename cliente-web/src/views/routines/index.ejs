@@ -1,0 +1,262 @@
+<div class="page-header">
+    <h2>🔧 Gestión de Rutinas G-code</h2>
+    <div class="actions">
+        <a href="/routines/new" class="btn btn-primary">➕ Nueva Rutina</a>
+        <a href="/panel" class="btn btn-secondary">🏠 Panel Principal</a>
+    </div>
+</div>
+
+<% if (locals.error) { %>
+    <div class="alert alert-error">
+        <strong>❌ Error:</strong> <%= error %>
+    </div>
+<% } %>
+
+<% if (locals.success) { %>
+    <div class="alert alert-success">
+        <strong>✅ Éxito:</strong> <%= success %>
+    </div>
+<% } %>
+
+<div class="routines-container">
+    <% if (routines && routines.length > 0) { %>
+        <div class="routines-grid">
+            <% routines.forEach(routine => { %>
+                <div class="routine-card">
+                    <div class="routine-header">
+                        <h3><%= routine.filename %></h3>
+                        <span class="file-size"><%= Math.round(routine.fileSize / 1024 * 100) / 100 %> KB</span>
+                    </div>
+                    
+                    <div class="routine-info">
+                        <p class="description">
+                            <strong>Descripción:</strong> 
+                            <%= routine.description || 'Sin descripción' %>
+                        </p>
+                        <p class="created-date">
+                            <strong>Creada:</strong> 
+                            <%= new Date(routine.createdAt * 1000).toLocaleString('es-ES') %>
+                        </p>
+                        <% if (routine.originalFilename !== routine.filename) { %>
+                            <p class="original-name">
+                                <strong>Archivo original:</strong> <%= routine.originalFilename %>
+                            </p>
+                        <% } %>
+                    </div>
+                    
+                    <div class="routine-actions">
+                        <a href="/routines/<%= routine.id %>" class="btn btn-info btn-sm">👁️ Ver</a>
+                        <a href="/routines/<%= routine.id %>/edit" class="btn btn-warning btn-sm">✏️ Editar</a>
+                        <a href="/routines/<%= routine.id %>/download" class="btn btn-secondary btn-sm">💾 Descargar</a>
+                        
+                        <form method="post" action="/routines/<%= routine.id %>/execute" style="display: inline;">
+                            <button type="submit" class="btn btn-success btn-sm" 
+                                    onclick="return confirm('¿Ejecutar rutina <%= routine.filename %>?')">
+                                ▶️ Ejecutar
+                            </button>
+                        </form>
+                        
+                        <form method="post" action="/routines/<%= routine.id %>/delete" style="display: inline;">
+                            <button type="submit" class="btn btn-danger btn-sm" 
+                                    onclick="return confirm('¿Estás seguro de eliminar <%= routine.filename %>?')">
+                                🗑️ Eliminar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    <% } else { %>
+        <div class="empty-state">
+            <div class="empty-icon">📄</div>
+            <h3>No tienes rutinas G-code</h3>
+            <p>Crea tu primera rutina subiendo un archivo G-code o escribiendo código directamente.</p>
+            <a href="/routines/new" class="btn btn-primary">➕ Crear Primera Rutina</a>
+        </div>
+    <% } %>
+</div>
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.alert {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 5px;
+    border: 1px solid;
+}
+
+.alert-error {
+    background-color: #fee;
+    border-color: #fcc;
+    color: #c00;
+}
+
+.alert-success {
+    background-color: #efe;
+    border-color: #cfc;
+    color: #060;
+}
+
+.routines-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 1.5rem;
+}
+
+.routine-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.routine-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.routine-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.routine-header h3 {
+    margin: 0;
+    color: #333;
+    font-size: 1.2rem;
+    word-break: break-word;
+}
+
+.file-size {
+    background: #f0f0f0;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.routine-info {
+    margin-bottom: 1.5rem;
+}
+
+.routine-info p {
+    margin: 0.5rem 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.routine-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #545b62;
+}
+
+.btn-info {
+    background: #17a2b8;
+    color: white;
+}
+
+.btn-info:hover {
+    background: #117a8b;
+}
+
+.btn-warning {
+    background: #ffc107;
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background: #e0a800;
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #1e7e34;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #666;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    margin-bottom: 2rem;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+</style>

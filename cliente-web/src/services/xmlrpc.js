@@ -58,6 +58,10 @@ function makeMock() {
         info: "This is MOCK status. Your C++ XML-RPC server is not connected."
       };
     },
+    async move(token, x, y, z, feed) {
+      lastMove = { x, y, z, feed, at: new Date().toISOString() };
+      return { ok: true, message: `MOCK move to X${x} Y${y} Z${z} F${feed ?? "-"}` };
+    },
     async moveLinear(token, coords) {
       lastMove = { ...coords, at: new Date().toISOString() };
       return { ok: true, message: `MOCK G1 to X${coords.x} Y${coords.y} Z${coords.z} F${coords.feed ?? "-"}` };
@@ -180,6 +184,15 @@ const real = {
   },
 
   // Movimientos del robot
+  async move(token, x, y, z, feed) {
+    try {
+      const result = await callMethod("move", [x, y, z, feed || 100]);
+      return result;
+    } catch (err) {
+      throw new Error("Error en movimiento: " + err.message);
+    }
+  },
+
   async moveLinear(token, coords) {
     try {
       const result = await callMethod("moveLinear", [coords.x, coords.y, coords.z, coords.feed || 1000]);
@@ -223,7 +236,10 @@ const real = {
     } catch (err) {
       throw new Error("Error conectando robot: " + err.message);
     }
-  }
+  },
+
+  // Método genérico para llamadas XML-RPC
+  methodCall: callMethod
 };
 
 // ---- EXPORTAR SERVICIO SEGUN CONFIGURACIÓN --------------------------------

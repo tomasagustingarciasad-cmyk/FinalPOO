@@ -8,3 +8,5 @@ servidor/servidor_rpc
 .venv/
 .vscode/
 __pycache__/
+*.log
+*.tmp

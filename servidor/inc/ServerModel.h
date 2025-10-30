@@ -417,6 +417,78 @@ public:
     }
 };
 
+/**
+ * @brief Método XML-RPC para obtener la posición actual del robot
+ */
+class GetPositionMethod : public ServiceMethod {
+private:
+    Robot* robot_;
+    
+public:
+    GetPositionMethod(XmlRpc::XmlRpcServer* srv, Robot* r)
+        : ServiceMethod("getPosition", "Obtener posición actual del robot", srv), robot_(r) {}
+    
+    void execute(XmlRpc::XmlRpcValue& /*params*/, XmlRpc::XmlRpcValue& result) override {
+        try {
+            if (!robot_->isConnected()) {
+                result["success"] = false;
+                result["message"] = "Robot no conectado";
+                return;
+            }
+            
+            Position pos = robot_->getCurrentPosition();
+            
+            result["success"] = true;
+            result["position"]["x"] = pos.x;
+            result["position"]["y"] = pos.y;
+            result["position"]["z"] = pos.z;
+            result["position"]["feedrate"] = pos.feedrate;
+            result["position"]["endEffectorActive"] = pos.endEffectorActive;
+            
+        } catch (const std::exception& e) {
+            result["success"] = false;
+            result["message"] = std::string("Error: ") + e.what();
+        }
+    }
+};
+
+/**
+ * @brief Método XML-RPC para controlar el tracking de posición
+ */
+class SetPositionTrackingMethod : public ServiceMethod {
+private:
+    Robot* robot_;
+    
+public:
+    SetPositionTrackingMethod(XmlRpc::XmlRpcServer* srv, Robot* r)
+        : ServiceMethod("setPositionTracking", "Habilitar/deshabilitar tracking de posición", srv), robot_(r) {}
+    
+    void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
+        if (params.size() != 1) {
+            throw XmlRpc::XmlRpcException("setPositionTracking requiere 1 parámetro: enable:bool");
+        }
+        
+        try {
+            if (!robot_->isConnected()) {
+                result["success"] = false;
+                result["message"] = "Robot no conectado";
+                return;
+            }
+            
+            bool enable = bool(params[0]);
+            robot_->enablePositionTracking(enable);
+            
+            result["success"] = true;
+            result["message"] = enable ? "Tracking habilitado" : "Tracking deshabilitado";
+            result["trackingEnabled"] = enable;
+            
+        } catch (const std::exception& e) {
+            result["success"] = false;
+            result["message"] = std::string("Error: ") + e.what();
+        }
+    }
+};
+
 // Helper: registrar aquí los métodos relacionados al Robot
 inline void registerRobotMethods(XmlRpc::XmlRpcServer* srv,
     std::vector<std::unique_ptr<ServiceMethod>>& methods, Robot* robot) {
@@ -428,6 +500,10 @@ inline void registerRobotMethods(XmlRpc::XmlRpcServer* srv,
     methods.push_back(std::make_unique<MoveMethod>(srv, robot));
     methods.push_back(std::make_unique<EndEffectorMethod>(srv, robot));
     methods.push_back(std::make_unique<ExecuteGcodeMethod>(srv, robot));
+    
+    // Nuevos métodos para tracking y aprendizaje
+    methods.push_back(std::make_unique<GetPositionMethod>(srv, robot));
+    methods.push_back(std::make_unique<SetPositionTrackingMethod>(srv, robot));
 }
 
 /**
@@ -1849,6 +1925,109 @@ public:
 };
 
 /**
+ * @brief Método XML-RPC para generar G-code desde una secuencia de movimientos
+ */
+class GenerateGcodeFromMovementsMethod : public ServiceMethod {
+private:
+    std::shared_ptr<UserManager> userManager_;
+    std::shared_ptr<RoutineManager> routineManager_;
+    
+public:
+    GenerateGcodeFromMovementsMethod(XmlRpc::XmlRpcServer* srv, std::shared_ptr<UserManager> userMgr, std::shared_ptr<RoutineManager> routineMgr)
+        : ServiceMethod("generateGcodeFromMovements", "Generar G-code desde movimientos y guardarlo como rutina", srv), 
+          userManager_(userMgr), routineManager_(routineMgr) {}
+    
+    void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
+        if (params.size() != 4) {
+            throw XmlRpc::XmlRpcException("generateGcodeFromMovements requiere 4 parámetros: token, routineName, description, movements");
+        }
+        
+        std::string token = params[0];
+        std::string routineName = params[1];
+        std::string description = params[2];
+        XmlRpc::XmlRpcValue movements = params[3];
+        
+        try {
+            // Verificar token
+            if (!userManager_->validateToken(token)) {
+                result["success"] = false;
+                result["message"] = "Token inválido";
+                return;
+            }
+            
+            auto currentUser = userManager_->getUserByToken(token);
+            if (!currentUser) {
+                result["success"] = false;
+                result["message"] = "Usuario no encontrado";
+                return;
+            }
+            
+            // Generar G-code desde los movimientos
+            std::ostringstream gcode;
+            gcode << "; Trayectoria aprendida: " << routineName << "\n";
+            gcode << "; Generado automáticamente desde modo aprendizaje\n";
+            gcode << "; Descripción: " << description << "\n\n";
+            
+            gcode << "G28 ; Home all axes\n";
+            gcode << "G90 ; Absolute positioning\n";
+            gcode << "G21 ; Units in millimeters\n\n";
+            
+            // Procesar cada movimiento
+            for (int i = 0; i < movements.size(); ++i) {
+                auto move = movements[i];
+                
+                if (move.hasMember("x") && move.hasMember("y") && move.hasMember("z")) {
+                    double x = double(move["x"]);
+                    double y = double(move["y"]);
+                    double z = double(move["z"]);
+                    double feedrate = move.hasMember("feedrate") ? double(move["feedrate"]) : 1000.0;
+                    bool endEffector = move.hasMember("endEffectorActive") ? bool(move["endEffectorActive"]) : false;
+                    
+                    gcode << "; Punto " << (i + 1) << "\n";
+                    gcode << "G1 X" << std::fixed << std::setprecision(3) << x 
+                          << " Y" << y << " Z" << z << " F" << feedrate << "\n";
+                    
+                    // Control del efector final si cambió de estado
+                    if (i == 0 || (i > 0 && bool(movements[i-1]["endEffectorActive"]) != endEffector)) {
+                        gcode << (endEffector ? "M106 ; End effector ON\n" : "M107 ; End effector OFF\n");
+                    }
+                    
+                    if (move.hasMember("notes") && !std::string(move["notes"]).empty()) {
+                        gcode << "; " << std::string(move["notes"]) << "\n";
+                    }
+                    gcode << "\n";
+                }
+            }
+            
+            gcode << "M107 ; End effector OFF\n";
+            gcode << "G28 ; Return to home\n";
+            gcode << "M18 ; Disable steppers\n";
+            
+            std::string gcodeContent = gcode.str();
+            
+            // Guardar como rutina en la base de datos
+            std::string filename = routineName + ".gcode";
+            int routineId = routineManager_->createRoutine(filename, filename, description, gcodeContent, currentUser->id);
+            
+            if (routineId > 0) {
+                result["success"] = true;
+                result["routineId"] = routineId;
+                result["filename"] = filename;
+                result["gcodeContent"] = gcodeContent;
+                result["message"] = "Trayectoria guardada exitosamente como rutina G-code";
+            } else {
+                result["success"] = false;
+                result["message"] = "Error guardando la rutina (posiblemente ya existe)";
+            }
+            
+        } catch (const std::exception& e) {
+            result["success"] = false;
+            result["message"] = std::string("Error: ") + e.what();
+        }
+    }
+};
+
+/**
  * @brief Implementación del método initializeAuthMethods() para ServerModel
  */
 inline void ServerModel::initializeAuthMethods() {
@@ -1869,6 +2048,9 @@ inline void ServerModel::initializeAuthMethods() {
         methods.push_back(std::make_unique<RoutineGetMethod>(server.get(), userManager_, routineManager));
         methods.push_back(std::make_unique<RoutineUpdateMethod>(server.get(), userManager_, routineManager));
         methods.push_back(std::make_unique<RoutineDeleteMethod>(server.get(), userManager_, routineManager));
+        
+        // Método para generar G-code desde movimientos aprendidos
+        methods.push_back(std::make_unique<GenerateGcodeFromMovementsMethod>(server.get(), userManager_, routineManager));
     } catch (const std::exception& e) {
         throw ServerInitializationException("Falló la inicialización de métodos de autenticación: " + std::string(e.what()));
     }

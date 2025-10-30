@@ -1,0 +1,333 @@
+<div class="page-header">
+    <h2>👁️ Ver Rutina: <%= routine.filename %></h2>
+    <div class="actions">
+        <a href="/routines" class="btn btn-secondary">🔙 Volver a Rutinas</a>
+        <a href="/routines/<%= routine.id %>/edit" class="btn btn-warning">✏️ Editar</a>
+    </div>
+</div>
+
+<% if (locals.error) { %>
+    <div class="alert alert-error">
+        <strong>❌ Error:</strong> <%= error %>
+    </div>
+<% } %>
+
+<% if (locals.success) { %>
+    <div class="alert alert-success">
+        <strong>✅ Éxito:</strong> <%= success %>
+    </div>
+<% } %>
+
+<div class="routine-container">
+    <div class="routine-details">
+        <div class="detail-card">
+            <h3>📋 Información de la Rutina</h3>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Nombre del archivo:</label>
+                    <value><%= routine.filename %></value>
+                </div>
+                <% if (routine.originalFilename !== routine.filename) { %>
+                    <div class="detail-item">
+                        <label>Archivo original:</label>
+                        <value><%= routine.originalFilename %></value>
+                    </div>
+                <% } %>
+                <div class="detail-item">
+                    <label>Descripción:</label>
+                    <value><%= routine.description || 'Sin descripción' %></value>
+                </div>
+                <div class="detail-item">
+                    <label>Tamaño del archivo:</label>
+                    <value><%= Math.round(routine.fileSize / 1024 * 100) / 100 %> KB</value>
+                </div>
+                <div class="detail-item">
+                    <label>Fecha de creación:</label>
+                    <value><%= new Date(routine.createdAt * 1000).toLocaleString('es-ES') %></value>
+                </div>
+                <div class="detail-item">
+                    <label>ID de rutina:</label>
+                    <value>#<%= routine.id %></value>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions-card">
+            <h3>⚡ Acciones Disponibles</h3>
+            <div class="action-buttons">
+                <form method="post" action="/routines/<%= routine.id %>/execute" style="display: inline;">
+                    <button type="submit" class="btn btn-success" 
+                            onclick="return confirm('¿Ejecutar la rutina <%= routine.filename %>?')">
+                        ▶️ Ejecutar Rutina
+                    </button>
+                </form>
+                
+                <a href="/routines/<%= routine.id %>/download" class="btn btn-info">
+                    💾 Descargar Archivo
+                </a>
+                
+                <a href="/routines/<%= routine.id %>/edit" class="btn btn-warning">
+                    ✏️ Editar Rutina
+                </a>
+                
+                <form method="post" action="/routines/<%= routine.id %>/delete" style="display: inline;">
+                    <button type="submit" class="btn btn-danger" 
+                            onclick="return confirm('¿Estás seguro de eliminar la rutina <%= routine.filename %>? Esta acción no se puede deshacer.')">
+                        🗑️ Eliminar Rutina
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="code-section">
+        <div class="code-card">
+            <div class="code-header">
+                <h3>📄 Contenido G-code</h3>
+                <div class="code-stats">
+                    <span class="line-count"><%= routine.gcodeContent.split('\n').length %> líneas</span>
+                    <span class="char-count"><%= routine.gcodeContent.length %> caracteres</span>
+                </div>
+            </div>
+            <div class="code-viewer">
+                <pre class="gcode-content"><code><%= routine.gcodeContent %></code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.page-header h2 {
+    margin: 0;
+    color: #333;
+    word-break: break-word;
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.alert {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 5px;
+    border: 1px solid;
+}
+
+.alert-error {
+    background-color: #fee;
+    border-color: #fcc;
+    color: #c00;
+}
+
+.alert-success {
+    background-color: #efe;
+    border-color: #cfc;
+    color: #060;
+}
+
+.routine-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+@media (max-width: 1024px) {
+    .routine-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.detail-card, .actions-card, .code-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+}
+
+.detail-card h3, .actions-card h3, .code-card h3 {
+    margin: 0 0 1rem 0;
+    color: #333;
+    font-size: 1.2rem;
+}
+
+.detail-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.detail-item {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.detail-item label {
+    font-weight: 500;
+    color: #666;
+}
+
+.detail-item value {
+    color: #333;
+    word-break: break-word;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.code-stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.line-count, .char-count {
+    background: #f0f0f0;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.code-viewer {
+    max-height: 600px;
+    overflow-y: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+}
+
+.gcode-content {
+    margin: 0;
+    padding: 1rem;
+    background: #f8f9fa;
+    font-family: 'Courier New', Monaco, monospace;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: #333;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    text-align: center;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #545b62;
+}
+
+.btn-info {
+    background: #17a2b8;
+    color: white;
+}
+
+.btn-info:hover {
+    background: #117a8b;
+}
+
+.btn-warning {
+    background: #ffc107;
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background: #e0a800;
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #1e7e34;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .actions {
+        justify-content: center;
+    }
+    
+    .detail-item {
+        grid-template-columns: 1fr;
+        gap: 0.25rem;
+    }
+    
+    .code-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .code-stats {
+        justify-content: center;
+    }
+}
+</style>

@@ -1,0 +1,543 @@
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-graduation-cap"></i> Modo de Aprendizaje</h2>
+                <div>
+                    <button id="trackingBtn" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-crosshairs"></i> Habilitar Tracking
+                    </button>
+                    <a href="/robot/move" class="btn btn-outline-secondary">
+                        <i class="fas fa-gamepad"></i> Control Manual
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estado del Sistema -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-info-circle"></i> Estado del Sistema
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted">Tracking:</small>
+                            <div id="trackingStatus" class="fw-bold text-danger">Deshabilitado</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Movimientos:</small>
+                            <div id="movementCount" class="fw-bold text-primary">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-crosshairs"></i> Posición Actual
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-4">
+                            <small class="text-muted">X:</small>
+                            <div id="posX" class="fw-bold">0.000</div>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-muted">Y:</small>
+                            <div id="posY" class="fw-bold">0.000</div>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-muted">Z:</small>
+                            <div id="posZ" class="fw-bold">0.000</div>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-6">
+                            <small class="text-muted">Velocidad:</small>
+                            <div id="posFeedrate" class="fw-bold">1000</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Efector:</small>
+                            <div id="posEndEffector" class="fw-bold text-secondary">OFF</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Control Manual Rápido -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-gamepad"></i> Control Rápido
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="quickX" class="form-label">X:</label>
+                                    <input type="number" class="form-control form-control-sm" id="quickX" step="0.1" value="0">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="quickY" class="form-label">Y:</label>
+                                    <input type="number" class="form-control form-control-sm" id="quickY" step="0.1" value="0">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="quickZ" class="form-label">Z:</label>
+                                    <input type="number" class="form-control form-control-sm" id="quickZ" step="0.1" value="0">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="quickFeed" class="form-label">Velocidad:</label>
+                                    <input type="number" class="form-control form-control-sm" id="quickFeed" value="1000" min="100" max="5000">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-flex gap-2">
+                                <button id="quickMoveBtn" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-play"></i> Mover
+                                </button>
+                                <button id="captureBtn" class="btn btn-success btn-sm">
+                                    <i class="fas fa-plus"></i> Capturar
+                                </button>
+                                <button id="endEffectorBtn" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-grip-horizontal"></i> Toggle Efector
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Movimientos Capturados -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                    <span><i class="fas fa-list"></i> Movimientos Capturados</span>
+                    <button id="clearMovementsBtn" class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-trash"></i> Limpiar
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="movementsList" class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>X</th>
+                                    <th>Y</th>
+                                    <th>Z</th>
+                                    <th>Velocidad</th>
+                                    <th>Efector</th>
+                                    <th>Notas</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="movementsTableBody">
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">
+                                        <i class="fas fa-info-circle"></i> No hay movimientos capturados
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guardar Rutina -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-save"></i> Guardar Trayectoria Aprendida
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="routineName" class="form-label">Nombre de la Rutina:</label>
+                            <input type="text" class="form-control" id="routineName" placeholder="mi_trayectoria_aprendida">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="routineDescription" class="form-label">Descripción:</label>
+                            <input type="text" class="form-control" id="routineDescription" placeholder="Descripción de la trayectoria...">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <button id="saveRoutineBtn" class="btn btn-success w-100" disabled>
+                                <i class="fas fa-save"></i> Guardar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div id="saveStatus" class="alert d-none" role="alert"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para vista previa del G-code -->
+<div class="modal fade" id="gcodePreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Vista Previa del G-code Generado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <pre id="gcodePreview" class="bg-light p-3" style="max-height: 400px; overflow-y: auto;"></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <a id="viewRoutineLink" href="#" class="btn btn-primary">Ver Rutina Guardada</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+class LearningMode {
+    constructor() {
+        this.trackingEnabled = false;
+        this.movements = [];
+        this.endEffectorState = false;
+        this.currentPosition = { x: 0, y: 0, z: 0, feedrate: 1000 };
+        
+        this.initializeEventListeners();
+        this.updatePosition();
+        
+        // Actualizar posición cada 2 segundos si el tracking está habilitado
+        setInterval(() => {
+            if (this.trackingEnabled) {
+                this.updatePosition();
+            }
+        }, 2000);
+    }
+    
+    initializeEventListeners() {
+        // Tracking toggle
+        document.getElementById('trackingBtn').addEventListener('click', () => {
+            this.toggleTracking();
+        });
+        
+        // Movimiento rápido
+        document.getElementById('quickMoveBtn').addEventListener('click', () => {
+            this.quickMove();
+        });
+        
+        // Capturar posición
+        document.getElementById('captureBtn').addEventListener('click', () => {
+            this.capturePosition();
+        });
+        
+        // Toggle efector
+        document.getElementById('endEffectorBtn').addEventListener('click', () => {
+            this.toggleEndEffector();
+        });
+        
+        // Limpiar movimientos
+        document.getElementById('clearMovementsBtn').addEventListener('click', () => {
+            this.clearMovements();
+        });
+        
+        // Guardar rutina
+        document.getElementById('saveRoutineBtn').addEventListener('click', () => {
+            this.saveRoutine();
+        });
+        
+        // Habilitar/deshabilitar botón de guardar según movimientos
+        this.updateSaveButton();
+    }
+    
+    async toggleTracking() {
+        try {
+            const response = await fetch('/learning/api/tracking', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ enable: !this.trackingEnabled })
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                this.trackingEnabled = result.trackingEnabled;
+                this.updateTrackingUI();
+                this.showAlert('success', result.message);
+            } else {
+                this.showAlert('danger', result.message);
+            }
+        } catch (error) {
+            this.showAlert('danger', 'Error al cambiar tracking: ' + error.message);
+        }
+    }
+    
+    async quickMove() {
+        const x = parseFloat(document.getElementById('quickX').value);
+        const y = parseFloat(document.getElementById('quickY').value);
+        const z = parseFloat(document.getElementById('quickZ').value);
+        const feedrate = parseFloat(document.getElementById('quickFeed').value);
+        
+        try {
+            const response = await fetch('/learning/api/move', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ x, y, z, feedrate })
+            });
+            
+            const result = await response.json();
+            if (result.success || result.ok) {
+                this.showAlert('success', 'Movimiento completado');
+                // Si el tracking está habilitado, el movimiento se registrará automáticamente
+                setTimeout(() => this.updatePosition(), 500);
+            } else {
+                this.showAlert('danger', result.message);
+            }
+        } catch (error) {
+            this.showAlert('danger', 'Error al mover: ' + error.message);
+        }
+    }
+    
+    async capturePosition() {
+        await this.updatePosition();
+        
+        const movement = {
+            x: this.currentPosition.x,
+            y: this.currentPosition.y,
+            z: this.currentPosition.z,
+            feedrate: this.currentPosition.feedrate,
+            endEffectorActive: this.endEffectorState,
+            notes: '',
+            timestamp: new Date()
+        };
+        
+        this.movements.push(movement);
+        this.updateMovementsList();
+        this.updateSaveButton();
+        this.showAlert('success', `Posición capturada: (${movement.x}, ${movement.y}, ${movement.z})`);
+    }
+    
+    async toggleEndEffector() {
+        try {
+            const response = await fetch('/learning/api/endeffector', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ state: !this.endEffectorState })
+            });
+            
+            const result = await response.json();
+            if (result.success || result.ok) {
+                this.endEffectorState = !this.endEffectorState;
+                this.updateEndEffectorUI();
+                this.showAlert('success', result.message);
+            } else {
+                this.showAlert('danger', result.message);
+            }
+        } catch (error) {
+            this.showAlert('danger', 'Error al controlar efector: ' + error.message);
+        }
+    }
+    
+    async updatePosition() {
+        try {
+            const response = await fetch('/learning/api/position');
+            const result = await response.json();
+            
+            if (result.success && result.position) {
+                this.currentPosition = result.position;
+                this.endEffectorState = result.position.endEffectorActive;
+                this.updatePositionUI();
+                this.updateEndEffectorUI();
+            }
+        } catch (error) {
+            // Silencioso si no se puede obtener posición
+        }
+    }
+    
+    clearMovements() {
+        if (this.movements.length > 0 && confirm('¿Estás seguro de que quieres limpiar todos los movimientos capturados?')) {
+            this.movements = [];
+            this.updateMovementsList();
+            this.updateSaveButton();
+            this.showAlert('info', 'Movimientos limpiados');
+        }
+    }
+    
+    async saveRoutine() {
+        const routineName = document.getElementById('routineName').value.trim();
+        const description = document.getElementById('routineDescription').value.trim();
+        
+        if (!routineName) {
+            this.showAlert('warning', 'Por favor ingresa un nombre para la rutina');
+            return;
+        }
+        
+        if (this.movements.length === 0) {
+            this.showAlert('warning', 'No hay movimientos para guardar');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/learning/api/save-learned-routine', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    routineName,
+                    description,
+                    movements: this.movements
+                })
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                this.showAlert('success', result.message);
+                
+                // Mostrar vista previa del G-code
+                document.getElementById('gcodePreview').textContent = result.gcodeContent;
+                document.getElementById('viewRoutineLink').href = `/routines/${result.routineId}`;
+                
+                // Mostrar modal
+                const modal = new bootstrap.Modal(document.getElementById('gcodePreviewModal'));
+                modal.show();
+                
+                // Limpiar formulario
+                document.getElementById('routineName').value = '';
+                document.getElementById('routineDescription').value = '';
+                
+            } else {
+                this.showAlert('danger', result.message);
+            }
+        } catch (error) {
+            this.showAlert('danger', 'Error al guardar rutina: ' + error.message);
+        }
+    }
+    
+    updateTrackingUI() {
+        const btn = document.getElementById('trackingBtn');
+        const status = document.getElementById('trackingStatus');
+        
+        if (this.trackingEnabled) {
+            btn.innerHTML = '<i class="fas fa-crosshairs"></i> Deshabilitar Tracking';
+            btn.className = 'btn btn-success me-2';
+            status.className = 'fw-bold text-success';
+            status.textContent = 'Habilitado';
+        } else {
+            btn.innerHTML = '<i class="fas fa-crosshairs"></i> Habilitar Tracking';
+            btn.className = 'btn btn-outline-primary me-2';
+            status.className = 'fw-bold text-danger';
+            status.textContent = 'Deshabilitado';
+        }
+    }
+    
+    updatePositionUI() {
+        document.getElementById('posX').textContent = this.currentPosition.x.toFixed(3);
+        document.getElementById('posY').textContent = this.currentPosition.y.toFixed(3);
+        document.getElementById('posZ').textContent = this.currentPosition.z.toFixed(3);
+        document.getElementById('posFeedrate').textContent = this.currentPosition.feedrate.toFixed(0);
+    }
+    
+    updateEndEffectorUI() {
+        const element = document.getElementById('posEndEffector');
+        if (this.endEffectorState) {
+            element.className = 'fw-bold text-success';
+            element.textContent = 'ON';
+        } else {
+            element.className = 'fw-bold text-secondary';
+            element.textContent = 'OFF';
+        }
+    }
+    
+    updateMovementsList() {
+        const tbody = document.getElementById('movementsTableBody');
+        document.getElementById('movementCount').textContent = this.movements.length;
+        
+        if (this.movements.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center text-muted">
+                        <i class="fas fa-info-circle"></i> No hay movimientos capturados
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = this.movements.map((movement, index) => `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${movement.x.toFixed(3)}</td>
+                <td>${movement.y.toFixed(3)}</td>
+                <td>${movement.z.toFixed(3)}</td>
+                <td>${movement.feedrate.toFixed(0)}</td>
+                <td>
+                    <span class="badge ${movement.endEffectorActive ? 'bg-success' : 'bg-secondary'}">
+                        ${movement.endEffectorActive ? 'ON' : 'OFF'}
+                    </span>
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm" 
+                           value="${movement.notes}" 
+                           onchange="learningMode.updateMovementNote(${index}, this.value)"
+                           placeholder="Notas...">
+                </td>
+                <td>
+                    <button class="btn btn-outline-danger btn-sm" 
+                            onclick="learningMode.removeMovement(${index})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+    
+    updateMovementNote(index, note) {
+        if (this.movements[index]) {
+            this.movements[index].notes = note;
+        }
+    }
+    
+    removeMovement(index) {
+        this.movements.splice(index, 1);
+        this.updateMovementsList();
+        this.updateSaveButton();
+    }
+    
+    updateSaveButton() {
+        const btn = document.getElementById('saveRoutineBtn');
+        btn.disabled = this.movements.length === 0;
+    }
+    
+    showAlert(type, message) {
+        const alertDiv = document.getElementById('saveStatus');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.textContent = message;
+        alertDiv.classList.remove('d-none');
+        
+        setTimeout(() => {
+            alertDiv.classList.add('d-none');
+        }, 5000);
+    }
+}
+
+// Inicializar cuando la página esté lista
+document.addEventListener('DOMContentLoaded', () => {
+    window.learningMode = new LearningMode();
+});
+</script>

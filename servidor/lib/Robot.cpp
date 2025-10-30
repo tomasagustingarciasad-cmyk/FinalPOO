@@ -75,17 +75,54 @@ bool Robot::move(double x, double y, double z, double vel){
     std::ostringstream ss; ss << std::fixed << std::setprecision(3);
     ss << "G0 X" << x << " Y" << y << " Z" << z;
     if (vel > 0) ss << " F" << vel;
-    return sendAndWaitOk(ss.str(), 8000);
+    
+    bool success = sendAndWaitOk(ss.str(), 8000);
+    
+    // Actualizar posición si el tracking está habilitado y el movimiento fue exitoso
+    if (success && positionTracking_) {
+        updateCurrentPosition(x, y, z, vel);
+    }
+    
+    return success;
 }
 
 bool Robot::endEffector(bool on){
     // Ajusta a tu efector real si no es ventilador
-    return sendAndWaitOk(on ? "M106" : "M107", 3000);
+    bool success = sendAndWaitOk(on ? "M106" : "M107", 3000);
+    
+    // Actualizar estado del efector si el tracking está habilitado
+    if (success && positionTracking_) {
+        setEndEffectorState(on);
+    }
+    
+    return success;
 }
 
 bool Robot::sendGcodeCommand(const std::string& command){
     // Método público para enviar comandos G-code directamente
     return sendAndWaitOk(command, 5000);
+}
+
+// Implementación de métodos de tracking
+Position Robot::getCurrentPosition() const {
+    std::lock_guard<std::mutex> lk(positionMutex_);
+    return currentPosition_;
+}
+
+bool Robot::updateCurrentPosition(double x, double y, double z, double feedrate) {
+    std::lock_guard<std::mutex> lk(positionMutex_);
+    currentPosition_.x = x;
+    currentPosition_.y = y;
+    currentPosition_.z = z;
+    if (feedrate > 0) {
+        currentPosition_.feedrate = feedrate;
+    }
+    return true;
+}
+
+void Robot::setEndEffectorState(bool active) {
+    std::lock_guard<std::mutex> lk(positionMutex_);
+    currentPosition_.endEffectorActive = active;
 }
 
 } // namespace RPCServer

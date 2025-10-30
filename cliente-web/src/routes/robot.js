@@ -14,9 +14,7 @@ res.render("robot/move", { result: null, error: null, last: null });
 router.post("/move", requireLogin, async (req, res) => {
 const { x, y, z, feed } = req.body;
 try {
-const result = await rpc.moveLinear(req.session.token, {
-x: Number(x), y: Number(y), z: Number(z), feed: feed ? Number(feed) : undefined
-});
+const result = await rpc.move(req.session.token, Number(x), Number(y), Number(z), feed ? Number(feed) : 100);
 res.render("robot/move", { result, error: null, last: { x, y, z, feed } });
 } catch (e) {
 res.status(400).render("robot/move", { result: null, error: e?.message || String(e), last: { x, y, z, feed } });
