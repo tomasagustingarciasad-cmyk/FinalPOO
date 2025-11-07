@@ -564,6 +564,29 @@ public:
     }
 };
 
+/**
+ * @brief Método XML-RPC para consultar si el robot está conectado
+ */
+class IsConnectedMethod : public ServiceMethod {
+private:
+    Robot* robot_;
+
+public:
+    IsConnectedMethod(XmlRpc::XmlRpcServer* srv, Robot* r)
+        : ServiceMethod("isConnected", "Indica si el robot está conectado", srv), robot_(r) {}
+
+    void execute(XmlRpc::XmlRpcValue& /*params*/, XmlRpc::XmlRpcValue& result) override {
+        try {
+            bool connected = robot_->isConnected();
+            result["success"] = true;
+            result["connected"] = connected;
+        } catch (const std::exception& e) {
+            result["success"] = false;
+            result["message"] = std::string("Error: ") + e.what();
+        }
+    }
+};
+
 // Helper: registrar aquí los métodos relacionados al Robot
 inline void registerRobotMethods(XmlRpc::XmlRpcServer* srv,
     std::vector<std::unique_ptr<ServiceMethod>>& methods, Robot* robot) {
@@ -579,6 +602,7 @@ inline void registerRobotMethods(XmlRpc::XmlRpcServer* srv,
     // Nuevos métodos para tracking y aprendizaje
     methods.push_back(std::make_unique<GetPositionMethod>(srv, robot));
     methods.push_back(std::make_unique<SetPositionTrackingMethod>(srv, robot));
+    methods.push_back(std::make_unique<IsConnectedMethod>(srv, robot));
 }
 
 /**
