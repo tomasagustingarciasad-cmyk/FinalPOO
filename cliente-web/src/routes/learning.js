@@ -1,6 +1,7 @@
 import { Router } from "express";
 import xmlrpc from "xmlrpc";
 import { requireLogin } from "../middleware/auth.js";
+import { logAuth, logSystem, logError } from "../services/logger.js";
 
 const router = Router();
 const client = xmlrpc.createClient({
@@ -21,6 +22,9 @@ const callRPC = (method, params) => {
 
 // Página principal del modo de aprendizaje
 router.get("/", requireLogin, (req, res) => {
+    const username = req.session?.user?.username || 'unknown';
+    logSystem(req, 'learning_access', `Acceso al modo de aprendizaje por usuario: ${username}`);
+    
     res.render("learning/index", {
         title: "Modo de Aprendizaje",
         user: req.session.user

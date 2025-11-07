@@ -2,6 +2,7 @@
 #include <string>
 #include <mutex>
 #include "SerialPort.h"
+#include "CSVLogger.h"
 
 namespace RPCServer {
 

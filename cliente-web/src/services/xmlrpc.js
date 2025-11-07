@@ -1,5 +1,6 @@
 import xmlrpc from "xmlrpc";
 import dotenv from "dotenv";
+import { logSystem, logError } from "./logger.js";
 
 dotenv.config();
 
@@ -15,11 +16,34 @@ const client = xmlrpc.createClient({
 // Función helper para promisificar llamadas XML-RPC
 function callMethod(method, params = []) {
   return new Promise((resolve, reject) => {
+    const startTime = Date.now();
+    
+    // Log de intento de llamada
+    logSystem({ ip: 'client', headers: { 'user-agent': 'xmlrpc-client' } }, 
+               'xmlrpc_call', 
+               `Llamada XML-RPC: ${method}`, 
+               `Parámetros: ${JSON.stringify(params).substring(0, 200)}...`);
+    
     client.methodCall(method, params, (error, value) => {
+      const duration = Date.now() - startTime;
+      
       if (error) {
         console.error(`XML-RPC Error [${method}]:`, error);
+        
+        // Log detallado del error
+        logError({ ip: 'client', headers: { 'user-agent': 'xmlrpc-client' } }, 
+                  'xmlrpc_error', 
+                  `Error XML-RPC [${method}]: ${error.message}`, 
+                  `Código: ${error.code || 'unknown'} | Duración: ${duration}ms | Detalles: ${JSON.stringify(error)}`);
+        
         reject(error);
       } else {
+        // Log de éxito
+        logSystem({ ip: 'client', headers: { 'user-agent': 'xmlrpc-client' } }, 
+                   'xmlrpc_success', 
+                   `XML-RPC exitoso [${method}]`, 
+                   `Duración: ${duration}ms | Respuesta: ${JSON.stringify(value).substring(0, 200)}...`);
+        
         resolve(value);
       }
     });

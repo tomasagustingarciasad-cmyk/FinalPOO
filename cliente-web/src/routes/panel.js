@@ -1,6 +1,7 @@
 import Router from "express-promise-router";
 import { requireLogin } from "../middleware/auth.js";
 import { rpc } from "../services/xmlrpc.js";
+import { logAuth, logSystem, logError } from "../services/logger.js";
 
 const router = new Router();
 
@@ -8,6 +9,9 @@ router.get("/", (req, res) => res.redirect("/panel"));
 
 router.get("/panel", requireLogin, async (req, res) => {
   try {
+    const username = req.session?.user?.username || 'unknown';
+    logSystem(req, 'panel_access', `Acceso al panel principal por usuario: ${username}`);
+    
     console.log("Panel route hit!");
     console.log("Session:", req.session);
     console.log("User:", req.session.user);
@@ -18,9 +22,11 @@ router.get("/panel", requireLogin, async (req, res) => {
     // Obtener estado del robot
     try {
       status = await rpc.myStatus(req.session.token);
+      logSystem(req, 'status_check', `Estado del robot obtenido exitosamente`);
     } catch (e) {
       error = "Error obteniendo estado: " + (e?.message || String(e));
       console.error("Error getting status:", e);
+      logError(req, 'status_check', `Error obteniendo estado del robot: ${e?.message || String(e)}`);
     }
     
     console.log("About to render template");

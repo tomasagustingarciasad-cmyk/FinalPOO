@@ -19,7 +19,7 @@ XMLRPC_SOURCES = lib/XmlRpcClient.cpp \
 				 inc/Robot.cpp \
 				 lib/SerialPort.cpp \
 				 lib/db_pool.cpp \
-				 lib/db_pool.cpp
+				 lib/CSVLogger.cpp
 
 # Object files for XML-RPC library
 XMLRPC_OBJECTS = $(XMLRPC_SOURCES:.cpp=.o)

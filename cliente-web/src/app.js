@@ -13,6 +13,7 @@ import panelRoutes from "./routes/panel.js";
 import robotRoutes from "./routes/robot.js";
 import routinesRoutes from "./routes/routines.js";
 import learningRoutes from "./routes/learning.js";
+import { loggerMiddleware, logSystem } from "./services/logger.js";
 
 
 dotenv.config();
@@ -35,6 +36,9 @@ app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
+
+// Logging middleware
+app.use(loggerMiddleware());
 app.use(
 session({
 name: "sid",
@@ -72,7 +76,14 @@ app.use((req, res) => res.status(404).render("404"));
 
 
 const port = process.env.PORT || 3000;
-app.listen(port, '0.0.0.0', () => console.log(`http://0.0.0.0:${port}`));
+
+// Inicializar logging
+logSystem('WebApp', 'INFO', 'Iniciando cliente web', `Puerto: ${port}, Entorno: ${process.env.NODE_ENV || 'development'}`);
+
+app.listen(port, '0.0.0.0', () => {
+    console.log(`http://0.0.0.0:${port}`);
+    logSystem('WebApp', 'INFO', 'Cliente web iniciado exitosamente', `Servidor corriendo en puerto ${port}`);
+});
 
 // app.listen(port, () => {
 // console.log(`Web client listening on http://localhost:${port}`);

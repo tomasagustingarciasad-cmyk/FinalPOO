@@ -4,6 +4,7 @@ import path from "path";
 import fs from "fs/promises";
 import { requireLogin } from "../middleware/auth.js";
 import { rpc } from "../services/xmlrpc.js";
+import { logAuth, logSystem, logError } from "../services/logger.js";
 
 const router = new Router();
 
@@ -28,7 +29,10 @@ const upload = multer({
 // GET - Listar rutinas del usuario
 router.get("/routines", requireLogin, async (req, res) => {
   try {
-    console.log("Listando rutinas para usuario:", req.session.user.username);
+    const username = req.session.user.username;
+    console.log("Listando rutinas para usuario:", username);
+    
+    logSystem(req, 'routines_list', `Listando rutinas para usuario: ${username}`);
     
     const result = await rpc.methodCall('routineList', [req.session.token]);
     
@@ -37,6 +41,9 @@ router.get("/routines", requireLogin, async (req, res) => {
     }
     
     const routines = result.routines || [];
+    
+    logSystem(req, 'routines_list_success', `Lista de rutinas obtenida exitosamente para ${username}`, 
+              `Cantidad de rutinas: ${routines.length}`);
     
     res.render("routines/index", { 
       routines,
@@ -47,6 +54,7 @@ router.get("/routines", requireLogin, async (req, res) => {
     
   } catch (error) {
     console.error("Error listando rutinas:", error);
+    logError(req, 'routines_list', `Error listando rutinas: ${error?.message || String(error)}`);
     res.render("routines/index", { 
       routines: [],
       user: req.session.user,

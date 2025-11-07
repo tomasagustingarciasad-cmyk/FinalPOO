@@ -13,6 +13,7 @@
 #include "RPCExceptions.h"
 #include "Robot.h"
 #include "../lib/db_pool.hpp"
+#include "CSVLogger.h"
 
 namespace RPCServer {
 
@@ -52,10 +53,23 @@ public:
 class ServiceMethod : public XmlRpc::XmlRpcServerMethod {
 protected:
     std::string methodDescription;
+    
+    // Helper para logging de requests
+    void logRequest(const std::string& user, const std::string& clientIP, int responseCode, const std::string& details = "") {
+        LOG_REQUEST(_name, user, clientIP, responseCode, details);
+    }
+    
+    // Helper para obtener IP del cliente (implementación básica)
+    std::string getClientIP() {
+        // En una implementación real, esto debería extraer la IP del contexto de la conexión
+        return "127.0.0.1"; // Por ahora localhost
+    }
 
 public:
     ServiceMethod(const std::string& name, const std::string& description, XmlRpc::XmlRpcServer* server)
-        : XmlRpc::XmlRpcServerMethod(name, server), methodDescription(description) {}
+        : XmlRpc::XmlRpcServerMethod(name, server), methodDescription(description) {
+        LOG_SYSTEM("ServiceMethod", LogLevel::DEBUG, "Método registrado", "Method: " + name + " - " + description);
+    }
 
     virtual std::string help() override { return methodDescription; }
     virtual void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override = 0;
@@ -72,8 +86,12 @@ public:
 
     void execute(XmlRpc::XmlRpcValue& /*params*/, XmlRpc::XmlRpcValue& result) override {
         try {
+            LOG_DEBUG("ServerTestMethod", "execute", "Procesando test del servidor", "");
             result = "Hi, soy el servidor RPC !!";
+            logRequest("anonymous", getClientIP(), 200, "Server test successful");
         } catch (const std::exception& e) {
+            LOG_ERROR("ServerTestMethod", "EXEC_ERROR", "Error en ServerTest", e.what());
+            logRequest("anonymous", getClientIP(), 500, "Server test failed: " + std::string(e.what()));
             throw MethodExecutionException("ServerTest", e.what());
         }
     }
@@ -235,14 +253,36 @@ public:
     ConnectRobotMethod(XmlRpc::XmlRpcServer* server, Robot* r)
       : ServiceMethod("connectRobot", "Conecta al puerto serie del robot", server), robot(r) {}
     void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
+        std::string clientIP = getClientIP();
+        std::string user = "unknown"; // TODO: Extraer del token
+        
         try {
-            if (params.size() < 1) throw InvalidParametersException("connectRobot", "port:string [, baud:int=9600]");
-            std::string port = std::string(params[0]);
+            if (params.size() < 1) {
+                LOG_WARNING("ConnectRobotMethod", "Parámetros insuficientes para connectRobot");
+                throw InvalidParametersException("connectRobot", "port:string [, baud:int=9600]");
+            }
+            
+            std::string port = static_cast<std::string>(params[0]);
             int baud = 115200;
-            if (params.size() >= 2) baud = int(params[1]);
-            if (robot->connect(port, baud)) { result["ok"] = true; result["message"] = "Conectado"; }
-            else { result["ok"] = false; result["message"] = "Fallo conectando"; }
+            if (params.size() >= 2) baud = static_cast<int>(params[1]);
+            
+            g_logger.logSystem("ConnectRobotMethod", LogLevel::INFO, "Intento de conexión robot", "Puerto: " + port + " Baud: " + std::to_string(baud));
+            
+            if (robot->connect(port, baud)) { 
+                result["ok"] = true; 
+                result["message"] = "Conectado";
+                g_logger.logSystem("ConnectRobotMethod", LogLevel::INFO, "Robot conectado exitosamente", "");
+                logRequest(user, clientIP, 200, "Robot connected successfully to " + port);
+            }
+            else { 
+                result["ok"] = false; 
+                result["message"] = "Fallo conectando";
+                g_logger.logError("ConnectRobotMethod", "", "Fallo conectando robot", "");
+                logRequest(user, clientIP, 500, "Robot connection failed to " + port);
+            }
         } catch (const std::exception& e) {
+            g_logger.logError("ConnectRobotMethod", "", "Excepción en connectRobot", e.what());
+            logRequest(user, clientIP, 500, "Exception in connectRobot: " + std::string(e.what()));
             throw MethodExecutionException("connectRobot", e.what());
         }
     }
@@ -315,13 +355,49 @@ public:
     MoveMethod(XmlRpc::XmlRpcServer* server, Robot* r)
       : ServiceMethod("move", "Movimiento cartesiano", server), robot(r) {}
     void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
+        std::string clientIP = getClientIP();
+        std::string user = "unknown"; // TODO: Obtener del token cuando esté disponible
+        
         try {
-            if (params.size() < 4) throw InvalidParametersException("move", "x:double, y:double, z:double, vel:double");
-            if (!robot->isConnected()) { result["ok"]=false; result["message"]="No conectado"; return; }
+            if (params.size() < 4) {
+                LOG_WARNING("MoveMethod", "Parámetros insuficientes para move");
+                logRequest(user, clientIP, 400, "Insufficient parameters");
+                throw InvalidParametersException("move", "x:double, y:double, z:double, vel:double");
+            }
+            
+            if (!robot->isConnected()) { 
+                LOG_WARNING("MoveMethod", "Intento de movimiento sin robot conectado");
+                logRequest(user, clientIP, 409, "Robot not connected");
+                result["ok"]=false; 
+                result["message"]="No conectado"; 
+                return; 
+            }
+            
             double x = double(params[0]), y = double(params[1]), z = double(params[2]), vel = double(params[3]);
+            
+            LOG_DEBUG("MoveMethod", "execute", "Ejecutando movimiento", 
+                     "X:" + std::to_string(x) + " Y:" + std::to_string(y) + 
+                     " Z:" + std::to_string(z) + " Vel:" + std::to_string(vel));
+            
             bool ok = robot->move(x,y,z,vel);
-            result["ok"]=ok; result["message"]= ok ? "Movimiento enviado" : "Fallo move";
-        } catch (const std::exception& e) { throw MethodExecutionException("move", e.what()); }
+            
+            if (ok) {
+                LOG_INFO("MoveMethod", "Movimiento ejecutado exitosamente");
+                logRequest(user, clientIP, 200, "Movement successful - X:" + std::to_string(x) + 
+                          " Y:" + std::to_string(y) + " Z:" + std::to_string(z));
+            } else {
+                LOG_WARNING("MoveMethod", "Fallo en ejecución de movimiento");
+                logRequest(user, clientIP, 500, "Movement failed");
+            }
+            
+            result["ok"]=ok; 
+            result["message"]= ok ? "Movimiento enviado" : "Fallo move";
+            
+        } catch (const std::exception& e) { 
+            LOG_ERROR("MoveMethod", "MOVE_EXCEPTION", "Error durante movimiento", e.what());
+            logRequest(user, clientIP, 500, "Move exception: " + std::string(e.what()));
+            throw MethodExecutionException("move", e.what()); 
+        }
     }
 };
 
@@ -1300,17 +1376,26 @@ public:
         : ServiceMethod("authLogin", "Autenticación de usuarios", srv), userManager_(userMgr) {}
     
     void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
+        std::string clientIP = getClientIP();
+        std::string username = "unknown";
+        
         if (params.size() != 2) {
+            LOG_WARNING("AuthLoginMethod", "Intento de login con parámetros incorrectos");
+            logRequest("unknown", clientIP, 400, "Invalid parameters count");
             throw XmlRpc::XmlRpcException("authLogin requiere 2 parámetros: username, password");
         }
         
-        std::string username = params[0];
-        std::string password = params[1];
+        username = static_cast<std::string>(params[0]);
+        std::string password = static_cast<std::string>(params[1]);
+        
+        LOG_DEBUG("AuthLoginMethod", "execute", "Intento de login", "Usuario: " + username);
         
         try {
             std::string token = userManager_->login(username, password);
             
             if (token.empty()) {
+                LOG_WARNING("AuthLoginMethod", "Login fallido - credenciales inválidas para usuario: " + username);
+                logRequest(username, clientIP, 401, "Invalid credentials");
                 result["success"] = false;
                 result["message"] = "Credenciales inválidas";
                 return;
@@ -1318,10 +1403,15 @@ public:
             
             auto userInfo = userManager_->getUserByToken(token);
             if (!userInfo) {
+                LOG_ERROR("AuthLoginMethod", "TOKEN_ERROR", "Error obteniendo usuario por token", "Token: " + token);
+                logRequest(username, clientIP, 500, "Internal server error");
                 result["success"] = false;
                 result["message"] = "Error interno del servidor";
                 return;
             }
+            
+            LOG_INFO("AuthLoginMethod", "Login exitoso para usuario: " + username + " (ID: " + std::to_string(userInfo->id) + ")");
+            logRequest(username, clientIP, 200, "Login successful - Role: " + userInfo->role);
             
             result["success"] = true;
             result["token"] = token;
@@ -1331,6 +1421,8 @@ public:
             result["user"]["active"] = userInfo->active;
             
         } catch (const std::exception& e) {
+            LOG_ERROR("AuthLoginMethod", "LOGIN_EXCEPTION", "Excepción durante login", "Usuario: " + username + " Error: " + e.what());
+            logRequest(username, clientIP, 500, "Login exception: " + std::string(e.what()));
             result["success"] = false;
             result["message"] = std::string("Error de login: ") + e.what();
         }
@@ -1353,7 +1445,7 @@ public:
             throw XmlRpc::XmlRpcException("authLogout requiere 1 parámetro: token");
         }
         
-        std::string token = params[0];
+        std::string token = static_cast<std::string>(params[0]);
         
         try {
             bool success = userManager_->logout(token);
@@ -1383,10 +1475,10 @@ public:
             throw XmlRpc::XmlRpcException("userCreate requiere 4 parámetros: token, username, password, role");
         }
         
-        std::string token = params[0];
-        std::string username = params[1];
-        std::string password = params[2];
-        std::string role = params[3];
+        std::string token = static_cast<std::string>(params[0]);
+        std::string username = static_cast<std::string>(params[1]);
+        std::string password = static_cast<std::string>(params[2]);
+        std::string role = static_cast<std::string>(params[3]);
         
         try {
             // Verificar token y permisos
@@ -1437,7 +1529,7 @@ public:
             throw XmlRpc::XmlRpcException("userList requiere 1 parámetro: token");
         }
         
-        std::string token = params[0];
+        std::string token = static_cast<std::string>(params[0]);
         
         try {
             // Verificar token y permisos
@@ -1490,8 +1582,8 @@ public:
             throw XmlRpc::XmlRpcException("userInfo requiere 2 parámetros: token, username");
         }
         
-        std::string token = params[0];
-        std::string username = params[1];
+        std::string token = static_cast<std::string>(params[0]);
+        std::string username = static_cast<std::string>(params[1]);
         
         try {
             // Verificar token
@@ -1538,8 +1630,8 @@ public:
             throw XmlRpc::XmlRpcException("userUpdate requiere 3 parámetros: token, username, updates");
         }
         
-        std::string token = params[0];
-        std::string username = params[1];
+        std::string token = static_cast<std::string>(params[0]);
+        std::string username = static_cast<std::string>(params[1]);
         XmlRpc::XmlRpcValue updates = params[2];
         
         try {
@@ -1618,8 +1710,8 @@ public:
             throw XmlRpc::XmlRpcException("userDelete requiere 2 parámetros: token, username");
         }
         
-        std::string token = params[0];
-        std::string username = params[1];
+        std::string token = static_cast<std::string>(params[0]);
+        std::string username = static_cast<std::string>(params[1]);
         
         try {
             // Verificar token y permisos
@@ -1672,11 +1764,11 @@ public:
             throw XmlRpc::XmlRpcException("routineCreate requiere 5 parámetros: token, filename, originalFilename, description, gcodeContent");
         }
         
-        std::string token = params[0];
-        std::string filename = params[1];
-        std::string originalFilename = params[2];
-        std::string description = params[3];
-        std::string gcodeContent = params[4];
+        std::string token = static_cast<std::string>(params[0]);
+        std::string filename = static_cast<std::string>(params[1]);
+        std::string originalFilename = static_cast<std::string>(params[2]);
+        std::string description = static_cast<std::string>(params[3]);
+        std::string gcodeContent = static_cast<std::string>(params[4]);
         
         try {
             // Verificar token
@@ -1728,7 +1820,7 @@ public:
             throw XmlRpc::XmlRpcException("routineList requiere 1 parámetro: token");
         }
         
-        std::string token = params[0];
+        std::string token = static_cast<std::string>(params[0]);
         
         try {
             // Verificar token
@@ -1784,8 +1876,8 @@ public:
             throw XmlRpc::XmlRpcException("routineGet requiere 2 parámetros: token, routineId");
         }
         
-        std::string token = params[0];
-        int routineId = params[1];
+        std::string token = static_cast<std::string>(params[0]);
+        int routineId = static_cast<int>(params[1]);
         
         try {
             // Verificar token
@@ -1843,11 +1935,11 @@ public:
             throw XmlRpc::XmlRpcException("routineUpdate requiere 5 parámetros: token, routineId, filename, description, gcodeContent");
         }
         
-        std::string token = params[0];
-        int routineId = params[1];
-        std::string filename = params[2];
-        std::string description = params[3];
-        std::string gcodeContent = params[4];
+        std::string token = static_cast<std::string>(params[0]);
+        int routineId = static_cast<int>(params[1]);
+        std::string filename = static_cast<std::string>(params[2]);
+        std::string description = static_cast<std::string>(params[3]);
+        std::string gcodeContent = static_cast<std::string>(params[4]);
         
         try {
             // Verificar token
@@ -1893,8 +1985,8 @@ public:
             throw XmlRpc::XmlRpcException("routineDelete requiere 2 parámetros: token, routineId");
         }
         
-        std::string token = params[0];
-        int routineId = params[1];
+        std::string token = static_cast<std::string>(params[0]);
+        int routineId = static_cast<int>(params[1]);
         
         try {
             // Verificar token
@@ -1941,9 +2033,9 @@ public:
             throw XmlRpc::XmlRpcException("generateGcodeFromMovements requiere 4 parámetros: token, routineName, description, movements");
         }
         
-        std::string token = params[0];
-        std::string routineName = params[1];
-        std::string description = params[2];
+        std::string token = static_cast<std::string>(params[0]);
+        std::string routineName = static_cast<std::string>(params[1]);
+        std::string description = static_cast<std::string>(params[2]);
         XmlRpc::XmlRpcValue movements = params[3];
         
         try {
