@@ -95,7 +95,7 @@ bool Robot::enableMotors(bool on){
 }
 
 bool Robot::home(){
-    return sendAndWaitOk("G28", 8000); // homing puede tardar más
+    return sendAndWaitOk("G28", 15000); // homing puede tardar más
 }
 
 bool Robot::move(double x, double y, double z, double vel){
@@ -103,7 +103,7 @@ bool Robot::move(double x, double y, double z, double vel){
     ss << "G0 X" << x << " Y" << y << " Z" << z;
     if (vel > 0) ss << " F" << vel;
     
-    bool success = sendAndWaitOk(ss.str(), 8000);
+    bool success = sendAndWaitOk(ss.str(), 15000);
     
     // Actualizar posición si el tracking está habilitado y el movimiento fue exitoso
     if (success && positionTracking_) {
@@ -115,7 +115,7 @@ bool Robot::move(double x, double y, double z, double vel){
 
 bool Robot::endEffector(bool on){
     // Ajusta a tu efector real si no es ventilador
-    bool success = sendAndWaitOk(on ? "M106" : "M107", 3000);
+    bool success = sendAndWaitOk(on ? "M106" : "M107", 5000);
     
     // Actualizar estado del efector si el tracking está habilitado
     if (success && positionTracking_) {
@@ -127,7 +127,7 @@ bool Robot::endEffector(bool on){
 
 bool Robot::sendGcodeCommand(const std::string& command){
     // Método público para enviar comandos G-code directamente
-    return sendAndWaitOk(command, 5000);
+    return sendAndWaitOk(command, 15000);
 }
 
 // Implementación de métodos de tracking
