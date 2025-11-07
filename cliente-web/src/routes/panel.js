@@ -12,19 +12,20 @@ router.get("/panel", requireLogin, async (req, res) => {
     console.log("Session:", req.session);
     console.log("User:", req.session.user);
     
-    let status = {
-      mode: "ABS",
-      motorsOn: false,
-      gripperOn: false,
-      position: { x: 0, y: 0, z: 0 },
-      lastMove: null,
-      info: "Conectado al servidor C++ XML-RPC"
-    };
+    let status = null;
     let error = null;
+    
+    // Obtener estado del robot
+    try {
+      status = await rpc.myStatus(req.session.token);
+    } catch (e) {
+      error = "Error obteniendo estado: " + (e?.message || String(e));
+      console.error("Error getting status:", e);
+    }
     
     console.log("About to render template");
     
-    res.render("panel/simple", { 
+    res.render("panel/index", { 
       status, 
       error, 
       user: req.session.user 

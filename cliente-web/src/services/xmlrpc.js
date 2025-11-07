@@ -36,6 +36,7 @@ function makeMock() {
   let lastMove = null;
   let motorsOn = false;
   let gripperOn = false;
+  let connected = false;
 
   const mkToken = (u) => Buffer.from(`${u.username}|${Date.now()}`).toString("base64");
 
@@ -53,6 +54,7 @@ function makeMock() {
         mode: "ABS",
         motorsOn,
         gripperOn,
+        connected,
         position: { x: 0, y: 0, z: 0 },
         lastMove,
         info: "This is MOCK status. Your C++ XML-RPC server is not connected."
@@ -75,6 +77,12 @@ function makeMock() {
     },
     async gripper(token, on) {
       gripperOn = !!on; return { ok: true, gripperOn };
+    },
+    async connectRobot(token, port, baudrate) {
+      connected = true; return { ok: true, message: `MOCK conectado a ${port} @ ${baudrate}` };
+    },
+    async disconnectRobot(token) {
+      connected = false; return { ok: true, message: "MOCK desconectado" };
     }
   };
 }
@@ -170,13 +178,24 @@ const real = {
   async myStatus(token) {
     try {
       const result = await callMethod("ServerTest");
+      // Intentar obtener estado más detallado si está disponible
+      let robotConnected = false;
+      try {
+        const posResult = await callMethod("getPosition");
+        robotConnected = posResult && !posResult.message?.includes("No conectado");
+      } catch (e) {
+        // Si falla getPosition, asumimos que no está conectado
+        robotConnected = false;
+      }
+      
       return {
         mode: "ABS",
         motorsOn: false,
         gripperOn: false,
+        connected: robotConnected,
         position: { x: 0, y: 0, z: 0 },
         lastMove: null,
-        info: "Conectado al servidor C++ XML-RPC"
+        info: robotConnected ? "Robot conectado" : "Robot no conectado"
       };
     } catch (err) {
       throw new Error("Error obteniendo estado: " + err.message);
@@ -235,6 +254,15 @@ const real = {
       return result;
     } catch (err) {
       throw new Error("Error conectando robot: " + err.message);
+    }
+  },
+
+  async disconnectRobot(token) {
+    try {
+      const result = await callMethod("disconnectRobot", []);
+      return result;
+    } catch (err) {
+      throw new Error("Error desconectando robot: " + err.message);
     }
   },
 

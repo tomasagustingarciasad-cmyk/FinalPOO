@@ -36,16 +36,26 @@
                         </div>
                         <hr>
                         <div class="row">
-                            <div class="col-6">
+                            <div class="col-4">
+                                <strong>Conexión:</strong>
+                                <% if (typeof status.connected !== 'undefined') { %>
+                                    <span class="badge <%= status.connected ? 'bg-success' : 'bg-danger' %>">
+                                        <%= status.connected ? 'CONECTADO' : 'DESCONECTADO' %>
+                                    </span>
+                                <% } else { %>
+                                    <span class="badge bg-secondary">N/A</span>
+                                <% } %>
+                            </div>
+                            <div class="col-4">
                                 <strong>Motores:</strong> 
                                 <span class="badge <%= status.motorsOn ? 'bg-success' : 'bg-secondary' %>">
-                                    <%= status.motorsOn ? 'ENCENDIDOS' : 'APAGADOS' %>
+                                    <%= status.motorsOn ? 'ON' : 'OFF' %>
                                 </span>
                             </div>
-                            <div class="col-6">
+                            <div class="col-4">
                                 <strong>Gripper:</strong>
                                 <span class="badge <%= status.gripperOn ? 'bg-success' : 'bg-secondary' %>">
-                                    <%= status.gripperOn ? 'ABIERTO' : 'CERRADO' %>
+                                    <%= status.gripperOn ? 'ON' : 'OFF' %>
                                 </span>
                             </div>
                         </div>
@@ -75,6 +85,35 @@
                     <h5><i class="bi bi-joystick"></i> Controles</h5>
                 </div>
                 <div class="card-body">
+                    <!-- Controles de Conexión -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <strong>Estado de Conexión:</strong>
+                            <% if (status && typeof status.connected !== 'undefined') { %>
+                                <span class="badge <%= status.connected ? 'bg-success' : 'bg-danger' %>">
+                                    <%= status.connected ? 'CONECTADO' : 'DESCONECTADO' %>
+                                </span>
+                            <% } else { %>
+                                <span class="badge bg-secondary">DESCONOCIDO</span>
+                            <% } %>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <button type="button" class="btn btn-success w-100" onclick="showConnectModal()">
+                                <i class="bi bi-plug"></i> Conectar Robot
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <form method="post" action="/robot/disconnect" class="d-inline w-100">
+                                <button type="submit" class="btn btn-danger w-100">
+                                    <i class="bi bi-plug-fill"></i> Desconectar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
                     <div class="row mb-3">
                         <div class="col-6">
                             <form method="post" action="/homing" class="d-inline">
@@ -132,3 +171,103 @@
         </div>
     </div>
 </div>
+
+<!-- Modal para Configuración de Conexión -->
+<div class="modal fade" id="connectModal" tabindex="-1" aria-labelledby="connectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="connectModalLabel">
+                    <i class="bi bi-plug"></i> Conectar Robot
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="/robot/connect">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="port" class="form-label">Puerto Serie</label>
+                        <select class="form-select" id="port" name="port" required>
+                            <option value="/dev/ttyUSB0" selected>/dev/ttyUSB0 (USB Serial)</option>
+                            <option value="/dev/ttyACM0">/dev/ttyACM0 (Arduino)</option>
+                            <option value="/dev/ttyS0">/dev/ttyS0 (Serial Port 1)</option>
+                            <option value="/dev/ttyS1">/dev/ttyS1 (Serial Port 2)</option>
+                            <option value="COM1">COM1 (Windows)</option>
+                            <option value="COM2">COM2 (Windows)</option>
+                            <option value="COM3">COM3 (Windows)</option>
+                        </select>
+                        <div class="form-text">
+                            Selecciona el puerto donde está conectado el robot
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="baudrate" class="form-label">Velocidad (Baudrate)</label>
+                        <select class="form-select" id="baudrate" name="baudrate" required>
+                            <option value="9600" selected>9600 bps</option>
+                            <option value="19200">19200 bps</option>
+                            <option value="38400">38400 bps</option>
+                            <option value="57600">57600 bps</option>
+                            <option value="115200">115200 bps</option>
+                            <option value="250000">250000 bps</option>
+                        </select>
+                        <div class="form-text">
+                            Velocidad de comunicación serie con el robot
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-plug"></i> Conectar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function showConnectModal() {
+    const modal = new bootstrap.Modal(document.getElementById('connectModal'));
+    modal.show();
+}
+
+// Mostrar mensajes de éxito/error si existen en la URL
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const success = urlParams.get('success');
+    const error = urlParams.get('error');
+    
+    if (success) {
+        showAlert('success', success);
+        // Limpiar la URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    
+    if (error) {
+        showAlert('danger', error);
+        // Limpiar la URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+});
+
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.role = 'alert';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    // Insertar al inicio del container
+    const container = document.querySelector('.container');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    // Auto-ocultar después de 5 segundos
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+</script>

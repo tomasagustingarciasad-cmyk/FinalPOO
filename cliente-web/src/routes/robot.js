@@ -53,5 +53,24 @@ res.status(400).render("panel/index", { status: null, error: e?.message || Strin
 }
 });
 
+router.post("/connect", requireLogin, async (req, res) => {
+try {
+const { port, baudrate } = req.body;
+const result = await rpc.connectRobot(req.session.token, port || "/dev/ttyUSB0", baudrate || 9600);
+res.redirect("/panel?success=" + encodeURIComponent("Robot conectado: " + result.message));
+} catch (e) {
+res.status(400).render("panel/index", { status: null, error: e?.message || String(e) });
+}
+});
+
+router.post("/disconnect", requireLogin, async (req, res) => {
+try {
+const result = await rpc.disconnectRobot(req.session.token);
+res.redirect("/panel?success=" + encodeURIComponent("Robot desconectado: " + result.message));
+} catch (e) {
+res.status(400).render("panel/index", { status: null, error: e?.message || String(e) });
+}
+});
+
 
 export default router;
