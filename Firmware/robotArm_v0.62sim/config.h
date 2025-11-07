@@ -5,9 +5,9 @@
 #define BAUD 115200
 
 //MEGA2560 BY DEFAULT, SET TO true IF UNO & CNC SHILED USED TO DRIVE ROBOT
-#define USE_UNO false
+#define USE_UNO true
 // Para usar en Modo SIMULATION
-#define USE_ESP8266 true // permite reconfigurar modo de trabajo WiFi cuando se usa este MCU
+#define USE_ESP8266 false // permite reconfigurar modo de trabajo WiFi cuando se usa este MCU
 #define SIMULATION true // util para todas las placas (desactiva pin/read/write)
 
 //ROBOT ARM LENGTH

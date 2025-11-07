@@ -16,7 +16,7 @@ XMLRPC_SOURCES = lib/XmlRpcClient.cpp \
                  lib/XmlRpcSource.cpp \
                  lib/XmlRpcUtil.cpp \
                  lib/XmlRpcValue.cpp \
-				 lib/Robot.cpp \
+				 inc/Robot.cpp \
 				 lib/SerialPort.cpp \
 				 lib/db_pool.cpp \
 				 lib/db_pool.cpp

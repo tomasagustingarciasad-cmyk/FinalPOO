@@ -161,7 +161,6 @@ public:
       : config(std::move(serverConfig)), isRunning(false) {
         server = std::make_unique<XmlRpc::XmlRpcServer>();
         robot_ = std::make_unique<Robot>(); // inicializar robot
-        
         // Inicializar managers
         databaseManager_ = std::make_shared<DatabaseManager>();
         userManager_ = std::make_shared<UserManager>(databaseManager_);
@@ -239,7 +238,7 @@ public:
         try {
             if (params.size() < 1) throw InvalidParametersException("connectRobot", "port:string [, baud:int=9600]");
             std::string port = std::string(params[0]);
-            int baud = 9600;
+            int baud = 115200;
             if (params.size() >= 2) baud = int(params[1]);
             if (robot->connect(port, baud)) { result["ok"] = true; result["message"] = "Conectado"; }
             else { result["ok"] = false; result["message"] = "Fallo conectando"; }
@@ -524,9 +523,9 @@ public:
         PgConfig cfg;
         cfg.host = "localhost";
         cfg.port = 31432;  // Puerto del Docker
-        cfg.dbname = "finalpoo";
+        cfg.dbname = "poo";
         cfg.user = "postgres";
-        cfg.password = "admin123";
+        cfg.password = "pass123";
         cfg.ssl_disable = true;
         
         try {

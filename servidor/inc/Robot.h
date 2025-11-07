@@ -26,6 +26,7 @@ class Robot {
     mutable std::mutex positionMutex_;  // mutable para permitir lock en métodos const
     
 public:
+
     bool connect(const std::string& port, int baud);
     void disconnect();
     bool isConnected() const;
