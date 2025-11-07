@@ -2648,3 +2648,655 @@ timestamp,type,module,level,method,user,client_ip,response_code,message,details
 2025-11-07 16:26:49.637,SYSTEM,MainServer,INFO,,,,0,Señal de terminación recibida,Signal: 2
 2025-11-07 16:26:49.637,SYSTEM,MainServer,INFO,,,,0,Servidor detenido correctamente,
 2025-11-07 16:26:49.639,SYSTEM,CSVLogger,INFO,,,,0,Logger finalizando,Cerrando archivo de log
+2025-11-07 16:30:17.454,SYSTEM,CSVLogger,INFO,,,,0,Logger inicializado correctamente,Archivo: logs/server_activity.csv
+2025-11-07 16:30:17.454,SYSTEM,MainServer,INFO,,,,0,Iniciando servidor Robot XML-RPC,Arguments: 2
+2025-11-07 16:30:17.454,SYSTEM,MainServer,DEBUG,,,,0,Argumento de línea de comandos,Function: main | argv[0] = ./servidor_rpc
+2025-11-07 16:30:17.454,SYSTEM,MainServer,DEBUG,,,,0,Argumento de línea de comandos,Function: main | argv[1] = 8080
+2025-11-07 16:30:17.454,SYSTEM,MainServer,INFO,,,,0,Manejadores de señales configurados,"SIGINT, SIGTERM"
+2025-11-07 16:30:17.454,SYSTEM,MainServer,INFO,,,,0,Creando controlador del servidor,
+2025-11-07 16:30:17.454,SYSTEM,MainServer,INFO,,,,0,Iniciando ejecución del servidor,
+2025-11-07 16:30:17.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: ServerTest - Respondo quien soy cuando no hay argumentos
+2025-11-07 16:30:17.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: Eco - Diga algo y recibira un saludo
+2025-11-07 16:30:17.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: Sumar - Indique varios numeros reales separados por espacio
+2025-11-07 16:30:17.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: connectRobot - Conecta al puerto serie del robot
+2025-11-07 16:30:17.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: disconnectRobot - Desconecta el puerto serie
+2025-11-07 16:30:17.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: setMode - Configura modo manual/absoluto
+2025-11-07 16:30:17.605,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: enableMotors - Enciende/Apaga motores
+2025-11-07 16:30:17.605,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: home - Homing del robot
+2025-11-07 16:30:17.605,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: move - Movimiento cartesiano
+2025-11-07 16:30:17.605,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: endEffector - Control gripper/endeffector
+2025-11-07 16:30:17.605,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: executeGcode - Ejecuta código G-code en el robot
+2025-11-07 16:30:17.605,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: getPosition - Obtener posición actual del robot
+2025-11-07 16:30:17.605,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: setPositionTracking - Habilitar/deshabilitar tracking de posición
+2025-11-07 16:30:17.605,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: isConnected - Indica si el robot está conectado
+2025-11-07 16:30:17.605,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: getRobotStatus - Obtiene estado completo del robot
+2025-11-07 16:30:17.605,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: authLogin - Autenticación de usuarios
+2025-11-07 16:30:17.605,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: authLogout - Logout de usuarios
+2025-11-07 16:30:17.605,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: userCreate - Crear nuevo usuario
+2025-11-07 16:30:17.605,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: userList - Listar usuarios
+2025-11-07 16:30:17.605,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: userInfo - Información de usuario
+2025-11-07 16:30:17.605,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: userUpdate - Actualizar usuario
+2025-11-07 16:30:17.605,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: userDelete - Eliminar usuario
+2025-11-07 16:30:17.605,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: routineCreate - Crear nueva rutina G-code
+2025-11-07 16:30:17.605,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: routineList - Listar rutinas G-code
+2025-11-07 16:30:17.605,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: routineGet - Obtener rutina G-code
+2025-11-07 16:30:17.605,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: routineUpdate - Actualizar rutina G-code
+2025-11-07 16:30:17.605,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: routineDelete - Eliminar rutina G-code
+2025-11-07 16:30:17.605,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: generateGcodeFromMovements - Generar G-code desde movimientos y guardarlo como rutina
+2025-11-07 16:30:48.011,SYSTEM,AuthLoginMethod,DEBUG,,,,0,Intento de login,Function: execute | Usuario: admin
+2025-11-07 16:30:48.012,SYSTEM,AuthLoginMethod,WARNING,,,,0,Login fallido - credenciales inválidas para usuario: admin,
+2025-11-07 16:30:48.013,REQUEST,XMLRPCServer,INFO,authLogin,admin,127.0.0.1,401,Petición procesada,Invalid credentials
+2025-11-07 16:31:56.392,SYSTEM,MainServer,INFO,,,,0,Señal de terminación recibida,Signal: 2
+2025-11-07 16:31:56.403,SYSTEM,MainServer,INFO,,,,0,Servidor detenido correctamente,
+2025-11-07 16:31:56.448,SYSTEM,CSVLogger,INFO,,,,0,Logger finalizando,Cerrando archivo de log
+2025-11-07 16:32:45.152,SYSTEM,CSVLogger,INFO,,,,0,Logger inicializado correctamente,Archivo: logs/server_activity.csv
+2025-11-07 16:32:45.155,SYSTEM,MainServer,INFO,,,,0,Iniciando servidor Robot XML-RPC,Arguments: 2
+2025-11-07 16:32:45.155,SYSTEM,MainServer,DEBUG,,,,0,Argumento de línea de comandos,Function: main | argv[0] = ./servidor_rpc
+2025-11-07 16:32:45.155,SYSTEM,MainServer,DEBUG,,,,0,Argumento de línea de comandos,Function: main | argv[1] = 8080
+2025-11-07 16:32:45.155,SYSTEM,MainServer,INFO,,,,0,Manejadores de señales configurados,"SIGINT, SIGTERM"
+2025-11-07 16:32:45.155,SYSTEM,MainServer,INFO,,,,0,Creando controlador del servidor,
+2025-11-07 16:32:45.155,SYSTEM,MainServer,INFO,,,,0,Iniciando ejecución del servidor,
+2025-11-07 16:32:45.627,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: ServerTest - Respondo quien soy cuando no hay argumentos
+2025-11-07 16:32:45.628,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: Eco - Diga algo y recibira un saludo
+2025-11-07 16:32:45.628,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: Sumar - Indique varios numeros reales separados por espacio
+2025-11-07 16:32:45.628,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: connectRobot - Conecta al puerto serie del robot
+2025-11-07 16:32:45.628,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: disconnectRobot - Desconecta el puerto serie
+2025-11-07 16:32:45.628,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: setMode - Configura modo manual/absoluto
+2025-11-07 16:32:45.628,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: enableMotors - Enciende/Apaga motores
+2025-11-07 16:32:45.628,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: home - Homing del robot
+2025-11-07 16:32:45.628,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: move - Movimiento cartesiano
+2025-11-07 16:32:45.628,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: endEffector - Control gripper/endeffector
+2025-11-07 16:32:45.628,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: executeGcode - Ejecuta código G-code en el robot
+2025-11-07 16:32:45.628,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: getPosition - Obtener posición actual del robot
+2025-11-07 16:32:45.628,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: setPositionTracking - Habilitar/deshabilitar tracking de posición
+2025-11-07 16:32:45.628,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: isConnected - Indica si el robot está conectado
+2025-11-07 16:32:45.628,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: getRobotStatus - Obtiene estado completo del robot
+2025-11-07 16:32:45.628,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: authLogin - Autenticación de usuarios
+2025-11-07 16:32:45.628,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: authLogout - Logout de usuarios
+2025-11-07 16:32:45.628,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: userCreate - Crear nuevo usuario
+2025-11-07 16:32:45.628,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: userList - Listar usuarios
+2025-11-07 16:32:45.628,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: userInfo - Información de usuario
+2025-11-07 16:32:45.628,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: userUpdate - Actualizar usuario
+2025-11-07 16:32:45.628,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: userDelete - Eliminar usuario
+2025-11-07 16:32:45.629,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: routineCreate - Crear nueva rutina G-code
+2025-11-07 16:32:45.629,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: routineList - Listar rutinas G-code
+2025-11-07 16:32:45.629,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: routineGet - Obtener rutina G-code
+2025-11-07 16:32:45.629,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: routineUpdate - Actualizar rutina G-code
+2025-11-07 16:32:45.629,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: routineDelete - Eliminar rutina G-code
+2025-11-07 16:32:45.629,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: generateGcodeFromMovements - Generar G-code desde movimientos y guardarlo como rutina
+2025-11-07 16:33:12.288,SYSTEM,AuthLoginMethod,DEBUG,,,,0,Intento de login,Function: execute | Usuario: admin
+2025-11-07 16:33:12.371,SYSTEM,AuthLoginMethod,INFO,,,,0,Login exitoso para usuario: admin (ID: 1),
+2025-11-07 16:33:12.371,REQUEST,XMLRPCServer,INFO,authLogin,admin,127.0.0.1,200,Petición procesada,Login successful - Role: ADMIN
+2025-11-07 16:33:24.165,SYSTEM,ConnectRobotMethod,INFO,,,,0,Intento de conexión robot,Puerto: /dev/ttyUSB0 Baud: 115200
+2025-11-07 16:33:24.167,SYSTEM,Robot,INFO,,,,0,Intentando conectar robot: /dev/ttyUSB0 Baud: 115200,
+2025-11-07 16:33:32.742,SYSTEM,Robot,ERROR,,,,0,Error abriendo puerto serie: /dev/ttyUSB0,ErrorCode: 
+2025-11-07 16:33:32.742,SYSTEM,ConnectRobotMethod,ERROR,,,,0,Fallo conectando robot,ErrorCode: 
+2025-11-07 16:33:32.742,REQUEST,XMLRPCServer,INFO,connectRobot,unknown,127.0.0.1,500,Petición procesada,Robot connection failed to /dev/ttyUSB0
+2025-11-07 16:33:35.690,SYSTEM,Robot,INFO,,,,0,Desconectando robot,
+2025-11-07 16:33:35.690,SYSTEM,Robot,INFO,,,,0,Robot desconectado,
+2025-11-07 16:33:42.400,SYSTEM,ConnectRobotMethod,INFO,,,,0,Intento de conexión robot,Puerto: /dev/ttyUSB0 Baud: 115200
+2025-11-07 16:33:42.400,SYSTEM,Robot,INFO,,,,0,Intentando conectar robot: /dev/ttyUSB0 Baud: 115200,
+2025-11-07 16:33:50.753,SYSTEM,Robot,ERROR,,,,0,Error abriendo puerto serie: /dev/ttyUSB0,ErrorCode: 
+2025-11-07 16:33:50.753,SYSTEM,ConnectRobotMethod,ERROR,,,,0,Fallo conectando robot,ErrorCode: 
+2025-11-07 16:33:50.753,REQUEST,XMLRPCServer,INFO,connectRobot,unknown,127.0.0.1,500,Petición procesada,Robot connection failed to /dev/ttyUSB0
+2025-11-07 16:33:53.521,SYSTEM,Robot,INFO,,,,0,Desconectando robot,
+2025-11-07 16:33:53.521,SYSTEM,Robot,INFO,,,,0,Robot desconectado,
+2025-11-07 16:33:54.788,SYSTEM,Robot,INFO,,,,0,Desconectando robot,
+2025-11-07 16:33:54.788,SYSTEM,Robot,INFO,,,,0,Robot desconectado,
+2025-11-07 16:33:56.685,SYSTEM,Robot,INFO,,,,0,Desconectando robot,
+2025-11-07 16:33:56.685,SYSTEM,Robot,INFO,,,,0,Robot desconectado,
+2025-11-07 16:34:02.284,SYSTEM,ConnectRobotMethod,INFO,,,,0,Intento de conexión robot,Puerto: /dev/ttyUSB0 Baud: 115200
+2025-11-07 16:34:02.284,SYSTEM,Robot,INFO,,,,0,Intentando conectar robot: /dev/ttyUSB0 Baud: 115200,
+2025-11-07 16:34:10.764,SYSTEM,Robot,ERROR,,,,0,Error abriendo puerto serie: /dev/ttyUSB0,ErrorCode: 
+2025-11-07 16:34:10.764,SYSTEM,ConnectRobotMethod,ERROR,,,,0,Fallo conectando robot,ErrorCode: 
+2025-11-07 16:34:10.764,REQUEST,XMLRPCServer,INFO,connectRobot,unknown,127.0.0.1,500,Petición procesada,Robot connection failed to /dev/ttyUSB0
+2025-11-07 16:34:34.326,SYSTEM,ConnectRobotMethod,INFO,,,,0,Intento de conexión robot,Puerto: /dev/ttyUSB0 Baud: 115200
+2025-11-07 16:34:34.326,SYSTEM,Robot,INFO,,,,0,Intentando conectar robot: /dev/ttyUSB0 Baud: 115200,
+2025-11-07 16:34:36.603,SYSTEM,Robot,DEBUG,,,,0,Puerto serie abierto exitosamente,Function:  | Esperando banner/sincronización
+2025-11-07 16:34:36.604,SYSTEM,Robot,DEBUG,,,,0,Banner recibido: '',Function: 
+2025-11-07 16:34:36.604,SYSTEM,Robot,DEBUG,,,,0,"Banner vacío, enviando línea en blanco",Function: 
+2025-11-07 16:34:36.609,SYSTEM,Robot,DEBUG,,,,0,Segundo intento de banner: 'INFO: ROBOT ONLINE',Function: 
+2025-11-07 16:34:36.611,SYSTEM,Robot,INFO,,,,0,Robot conectado exitosamente en puerto: /dev/ttyUSB0,
+2025-11-07 16:34:36.611,SYSTEM,ConnectRobotMethod,INFO,,,,0,Robot conectado exitosamente con tracking habilitado,
+2025-11-07 16:34:36.611,REQUEST,XMLRPCServer,INFO,connectRobot,unknown,127.0.0.1,200,Petición procesada,Robot connected successfully to /dev/ttyUSB0 with tracking enabled
+2025-11-07 16:34:44.371,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M17' (Timeout: 3000ms),Function: 
+2025-11-07 16:34:44.646,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: SEND ' (Elapsed: 500ms),Function: 
+2025-11-07 16:34:44.647,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'G28 TO CALI' (Elapsed: 1000ms),Function: 
+2025-11-07 16:34:44.648,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'BRATE' (Elapsed: 1500ms),Function: 
+2025-11-07 16:34:44.648,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'ERROR: COMM' (Elapsed: 2000ms),Function: 
+2025-11-07 16:34:46.813,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M17' (Timeout: 3000ms),Function: 
+2025-11-07 16:34:46.913,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'AND NOT REC' (Elapsed: 500ms),Function: 
+2025-11-07 16:34:46.913,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OGNIZED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:34:46.913,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 1500ms),Function: 
+2025-11-07 16:34:46.913,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S ENABLED' (Elapsed: 2000ms),Function: 
+2025-11-07 16:34:46.913,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 2500ms),Function: 
+2025-11-07 16:34:46.913,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 2500ms),Function: 
+2025-11-07 16:34:54.281,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M106' (Timeout: 5000ms),Function: 
+2025-11-07 16:34:54.954,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 500ms),Function: 
+2025-11-07 16:34:54.954,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S ENABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:34:54.954,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1500ms),Function: 
+2025-11-07 16:34:54.954,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1500ms),Function: 
+2025-11-07 16:34:57.111,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M107' (Timeout: 5000ms),Function: 
+2025-11-07 16:34:57.220,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: FAN E' (Elapsed: 500ms),Function: 
+2025-11-07 16:34:57.220,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'NABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:34:57.220,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1500ms),Function: 
+2025-11-07 16:34:57.220,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1500ms),Function: 
+2025-11-07 16:35:16.778,SYSTEM,MoveMethod,DEBUG,,,,0,Ejecutando movimiento,Function: execute | X:10.000000 Y:15.000000 Z:20.000000 Vel:1000.000000
+2025-11-07 16:35:16.782,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G0 X10.000 Y15.000 Z20.000 F1000.000' (Timeout: 15000ms),Function: 
+2025-11-07 16:35:17.264,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: FAN D' (Elapsed: 500ms),Function: 
+2025-11-07 16:35:17.265,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'ISABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:35:17.265,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1500ms),Function: 
+2025-11-07 16:35:17.265,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1500ms),Function: 
+2025-11-07 16:35:17.265,SYSTEM,MoveMethod,INFO,,,,0,Movimiento ejecutado exitosamente,
+2025-11-07 16:35:17.265,REQUEST,XMLRPCServer,INFO,move,unknown,127.0.0.1,200,Petición procesada,Movement successful - X:10.000000 Y:15.000000 Z:20.000000
+2025-11-07 16:35:23.550,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G28' (Timeout: 15000ms),Function: 
+2025-11-07 16:35:24.426,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: ' (Elapsed: 500ms),Function: 
+2025-11-07 16:35:24.427,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1000ms),Function: 
+2025-11-07 16:35:24.427,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1000ms),Function: 
+2025-11-07 16:35:34.156,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M106' (Timeout: 5000ms),Function: 
+2025-11-07 16:35:34.480,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'ERROR: POIN' (Elapsed: 500ms),Function: 
+2025-11-07 16:35:38.433,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M107' (Timeout: 5000ms),Function: 
+2025-11-07 16:35:38.518,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'T IS OUTSID' (Elapsed: 500ms),Function: 
+2025-11-07 16:35:38.518,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'E OF WORKSP' (Elapsed: 1000ms),Function: 
+2025-11-07 16:35:38.518,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'ACE' (Elapsed: 1500ms),Function: 
+2025-11-07 16:35:38.518,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: HOMIN' (Elapsed: 2000ms),Function: 
+2025-11-07 16:35:38.518,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'G COMPLETE' (Elapsed: 2500ms),Function: 
+2025-11-07 16:35:38.518,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 3500ms),Function: 
+2025-11-07 16:35:38.518,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 3500ms),Function: 
+2025-11-07 16:35:44.074,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M106' (Timeout: 5000ms),Function: 
+2025-11-07 16:35:44.556,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: FAN E' (Elapsed: 500ms),Function: 
+2025-11-07 16:35:44.557,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'NABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:35:44.557,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1500ms),Function: 
+2025-11-07 16:35:44.557,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1500ms),Function: 
+2025-11-07 16:35:46.928,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M107' (Timeout: 5000ms),Function: 
+2025-11-07 16:35:47.080,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: FAN D' (Elapsed: 500ms),Function: 
+2025-11-07 16:35:47.080,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'ISABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:35:47.080,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1500ms),Function: 
+2025-11-07 16:35:47.080,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1500ms),Function: 
+2025-11-07 16:43:17.461,SYSTEM,Robot,INFO,,,,0,Desconectando robot,
+2025-11-07 16:43:22.309,SYSTEM,Robot,INFO,,,,0,Robot desconectado,
+2025-11-07 16:43:34.497,SYSTEM,ConnectRobotMethod,INFO,,,,0,Intento de conexión robot,Puerto: /dev/ttyUSB0 Baud: 115200
+2025-11-07 16:43:34.497,SYSTEM,Robot,INFO,,,,0,Intentando conectar robot: /dev/ttyUSB0 Baud: 115200,
+2025-11-07 16:43:43.322,SYSTEM,Robot,ERROR,,,,0,Error abriendo puerto serie: /dev/ttyUSB0,ErrorCode: 
+2025-11-07 16:43:43.322,SYSTEM,ConnectRobotMethod,ERROR,,,,0,Fallo conectando robot,ErrorCode: 
+2025-11-07 16:43:43.322,REQUEST,XMLRPCServer,INFO,connectRobot,unknown,127.0.0.1,500,Petición procesada,Robot connection failed to /dev/ttyUSB0
+2025-11-07 16:44:00.266,SYSTEM,ConnectRobotMethod,INFO,,,,0,Intento de conexión robot,Puerto: /dev/ttyUSB0 Baud: 115200
+2025-11-07 16:44:00.266,SYSTEM,Robot,INFO,,,,0,Intentando conectar robot: /dev/ttyUSB0 Baud: 115200,
+2025-11-07 16:44:08.551,SYSTEM,Robot,DEBUG,,,,0,Puerto serie abierto exitosamente,Function:  | Esperando banner/sincronización
+2025-11-07 16:44:08.552,SYSTEM,Robot,DEBUG,,,,0,Banner recibido: '',Function: 
+2025-11-07 16:44:08.552,SYSTEM,Robot,DEBUG,,,,0,"Banner vacío, enviando línea en blanco",Function: 
+2025-11-07 16:44:08.556,SYSTEM,Robot,DEBUG,,,,0,Segundo intento de banner: 'INFO: ROBOT ONLINE',Function: 
+2025-11-07 16:44:08.556,SYSTEM,Robot,INFO,,,,0,Robot conectado exitosamente en puerto: /dev/ttyUSB0,
+2025-11-07 16:44:08.556,SYSTEM,ConnectRobotMethod,INFO,,,,0,Robot conectado exitosamente con tracking habilitado,
+2025-11-07 16:44:08.556,REQUEST,XMLRPCServer,INFO,connectRobot,unknown,127.0.0.1,200,Petición procesada,Robot connected successfully to /dev/ttyUSB0 with tracking enabled
+2025-11-07 16:44:13.314,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 16:44:13.589,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: SEND ' (Elapsed: 500ms),Function: 
+2025-11-07 16:44:13.591,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'G28 TO CALI' (Elapsed: 1000ms),Function: 
+2025-11-07 16:44:13.592,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'BRATE' (Elapsed: 1500ms),Function: 
+2025-11-07 16:44:13.593,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'ERROR: COMM' (Elapsed: 2000ms),Function: 
+2025-11-07 16:44:23.263,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G28' (Timeout: 15000ms),Function: 
+2025-11-07 16:44:23.625,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'AND NOT REC' (Elapsed: 500ms),Function: 
+2025-11-07 16:44:23.625,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OGNIZED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:44:23.625,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 1500ms),Function: 
+2025-11-07 16:44:23.625,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S DISABLED' (Elapsed: 2000ms),Function: 
+2025-11-07 16:44:23.625,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 3000ms),Function: 
+2025-11-07 16:44:23.625,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 3000ms),Function: 
+2025-11-07 16:44:27.480,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M17' (Timeout: 3000ms),Function: 
+2025-11-07 16:44:27.484,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: HOMIN' (Elapsed: 500ms),Function: 
+2025-11-07 16:44:27.485,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'G COMPLETE' (Elapsed: 1000ms),Function: 
+2025-11-07 16:44:27.485,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 2000ms),Function: 
+2025-11-07 16:44:27.485,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 2000ms),Function: 
+2025-11-07 16:44:30.360,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 16:44:30.520,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 500ms),Function: 
+2025-11-07 16:44:30.521,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S ENABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:44:30.521,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1500ms),Function: 
+2025-11-07 16:44:30.521,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1500ms),Function: 
+2025-11-07 16:44:32.961,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M17' (Timeout: 3000ms),Function: 
+2025-11-07 16:44:33.040,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 500ms),Function: 
+2025-11-07 16:44:33.040,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S DISABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:44:33.040,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 2000ms),Function: 
+2025-11-07 16:44:33.040,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 2000ms),Function: 
+2025-11-07 16:44:35.028,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M106' (Timeout: 5000ms),Function: 
+2025-11-07 16:44:35.033,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 500ms),Function: 
+2025-11-07 16:44:35.033,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S ENABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:44:35.033,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1500ms),Function: 
+2025-11-07 16:44:35.033,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1500ms),Function: 
+2025-11-07 16:44:37.930,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M107' (Timeout: 5000ms),Function: 
+2025-11-07 16:44:38.069,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: FAN E' (Elapsed: 500ms),Function: 
+2025-11-07 16:44:38.069,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'NABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:44:38.069,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1500ms),Function: 
+2025-11-07 16:44:38.069,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1500ms),Function: 
+2025-11-07 16:45:07.159,SYSTEM,MoveMethod,DEBUG,,,,0,Ejecutando movimiento,Function: execute | X:10.000000 Y:5.000000 Z:5.000000 Vel:1000.000000
+2025-11-07 16:45:07.160,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G0 X10.000 Y5.000 Z5.000 F1000.000' (Timeout: 15000ms),Function: 
+2025-11-07 16:45:08.124,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: FAN D' (Elapsed: 500ms),Function: 
+2025-11-07 16:45:08.124,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'ISABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:45:08.124,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1500ms),Function: 
+2025-11-07 16:45:08.124,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1500ms),Function: 
+2025-11-07 16:45:08.126,SYSTEM,MoveMethod,INFO,,,,0,Movimiento ejecutado exitosamente,
+2025-11-07 16:45:08.126,REQUEST,XMLRPCServer,INFO,move,unknown,127.0.0.1,200,Petición procesada,Movement successful - X:10.000000 Y:5.000000 Z:5.000000
+2025-11-07 16:46:04.141,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G28' (Timeout: 15000ms),Function: 
+2025-11-07 16:46:04.303,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: ' (Elapsed: 500ms),Function: 
+2025-11-07 16:46:04.303,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1000ms),Function: 
+2025-11-07 16:46:04.303,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1000ms),Function: 
+2025-11-07 16:46:27.123,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G28' (Timeout: 15000ms),Function: 
+2025-11-07 16:46:27.356,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'ERROR: POIN' (Elapsed: 500ms),Function: 
+2025-11-07 16:46:34.410,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G28' (Timeout: 15000ms),Function: 
+2025-11-07 16:46:35.404,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'T IS OUTSID' (Elapsed: 500ms),Function: 
+2025-11-07 16:46:35.404,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'E OF WORKSP' (Elapsed: 1000ms),Function: 
+2025-11-07 16:46:35.404,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'ACE' (Elapsed: 1500ms),Function: 
+2025-11-07 16:46:35.404,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: HOMIN' (Elapsed: 2000ms),Function: 
+2025-11-07 16:46:35.404,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'G COMPLETE' (Elapsed: 2500ms),Function: 
+2025-11-07 16:46:35.404,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 3500ms),Function: 
+2025-11-07 16:46:35.405,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 3500ms),Function: 
+2025-11-07 16:49:07.793,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 16:49:08.531,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: HOMIN' (Elapsed: 500ms),Function: 
+2025-11-07 16:49:08.532,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'G COMPLETE' (Elapsed: 1000ms),Function: 
+2025-11-07 16:49:08.532,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 2000ms),Function: 
+2025-11-07 16:49:08.532,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 2000ms),Function: 
+2025-11-07 16:49:13.841,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M17' (Timeout: 3000ms),Function: 
+2025-11-07 16:49:14.567,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: HOMIN' (Elapsed: 500ms),Function: 
+2025-11-07 16:49:14.567,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'G COMPLETE' (Elapsed: 1000ms),Function: 
+2025-11-07 16:49:14.567,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 2000ms),Function: 
+2025-11-07 16:49:14.567,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 2000ms),Function: 
+2025-11-07 16:51:48.347,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M106' (Timeout: 5000ms),Function: 
+2025-11-07 16:51:48.989,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 500ms),Function: 
+2025-11-07 16:51:48.989,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S DISABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:51:48.989,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 2000ms),Function: 
+2025-11-07 16:51:48.990,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 2000ms),Function: 
+2025-11-07 16:51:59.926,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M107' (Timeout: 5000ms),Function: 
+2025-11-07 16:52:00.343,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 500ms),Function: 
+2025-11-07 16:52:00.343,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S ENABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:52:00.343,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1500ms),Function: 
+2025-11-07 16:52:00.343,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1500ms),Function: 
+2025-11-07 16:52:05.814,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M107' (Timeout: 5000ms),Function: 
+2025-11-07 16:52:06.036,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: FAN E' (Elapsed: 500ms),Function: 
+2025-11-07 16:52:06.037,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'NABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:52:06.037,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1500ms),Function: 
+2025-11-07 16:52:06.037,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1500ms),Function: 
+2025-11-07 16:52:07.998,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 16:52:08.003,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: FAN D' (Elapsed: 500ms),Function: 
+2025-11-07 16:52:08.004,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'ISABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:52:08.004,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1500ms),Function: 
+2025-11-07 16:52:08.004,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1500ms),Function: 
+2025-11-07 16:52:15.176,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 16:52:15.356,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: FAN D' (Elapsed: 500ms),Function: 
+2025-11-07 16:52:15.356,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'ISABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:52:15.356,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1500ms),Function: 
+2025-11-07 16:52:15.356,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1500ms),Function: 
+2025-11-07 16:52:19.364,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 16:52:19.710,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 500ms),Function: 
+2025-11-07 16:52:19.710,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S DISABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:52:19.711,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 2000ms),Function: 
+2025-11-07 16:52:19.711,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 2000ms),Function: 
+2025-11-07 16:52:41.850,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 16:52:42.068,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 500ms),Function: 
+2025-11-07 16:52:42.068,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S DISABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:52:42.069,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 2000ms),Function: 
+2025-11-07 16:52:42.069,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 2000ms),Function: 
+2025-11-07 16:53:57.590,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 16:53:57.792,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 500ms),Function: 
+2025-11-07 16:53:57.793,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S DISABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:53:57.793,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 2000ms),Function: 
+2025-11-07 16:53:57.793,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 2000ms),Function: 
+2025-11-07 16:54:00.575,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M107' (Timeout: 5000ms),Function: 
+2025-11-07 16:54:01.144,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 500ms),Function: 
+2025-11-07 16:54:01.144,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S DISABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:54:01.144,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 2000ms),Function: 
+2025-11-07 16:54:01.144,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 2000ms),Function: 
+2025-11-07 16:54:04.695,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G28' (Timeout: 15000ms),Function: 
+2025-11-07 16:54:04.839,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 500ms),Function: 
+2025-11-07 16:54:04.839,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S DISABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:54:04.839,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 2000ms),Function: 
+2025-11-07 16:54:04.839,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 2000ms),Function: 
+2025-11-07 16:54:07.893,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 16:54:07.899,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: FAN D' (Elapsed: 500ms),Function: 
+2025-11-07 16:54:07.900,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'ISABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:54:07.900,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1500ms),Function: 
+2025-11-07 16:54:07.901,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1500ms),Function: 
+2025-11-07 16:54:16.598,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 16:54:17.255,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: HOMIN' (Elapsed: 500ms),Function: 
+2025-11-07 16:54:17.255,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'G COMPLETE' (Elapsed: 1000ms),Function: 
+2025-11-07 16:54:17.255,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 2000ms),Function: 
+2025-11-07 16:54:17.255,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 2000ms),Function: 
+2025-11-07 16:54:39.970,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M17' (Timeout: 3000ms),Function: 
+2025-11-07 16:54:40.615,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 500ms),Function: 
+2025-11-07 16:54:40.615,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S DISABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:54:40.615,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 2000ms),Function: 
+2025-11-07 16:54:40.615,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 2000ms),Function: 
+2025-11-07 16:54:44.914,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 16:54:44.966,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 500ms),Function: 
+2025-11-07 16:54:44.966,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S DISABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:54:44.966,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 2000ms),Function: 
+2025-11-07 16:54:44.966,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 2000ms),Function: 
+2025-11-07 16:54:47.834,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M106' (Timeout: 5000ms),Function: 
+2025-11-07 16:54:48.319,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 500ms),Function: 
+2025-11-07 16:54:48.319,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S ENABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:54:48.319,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1500ms),Function: 
+2025-11-07 16:54:48.319,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1500ms),Function: 
+2025-11-07 16:54:52.789,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M107' (Timeout: 5000ms),Function: 
+2025-11-07 16:54:53.014,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 500ms),Function: 
+2025-11-07 16:54:53.015,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S DISABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:54:53.015,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 2000ms),Function: 
+2025-11-07 16:54:53.015,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 2000ms),Function: 
+2025-11-07 16:54:56.244,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M17' (Timeout: 3000ms),Function: 
+2025-11-07 16:54:56.365,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: FAN E' (Elapsed: 500ms),Function: 
+2025-11-07 16:54:56.365,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'NABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:54:56.365,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1500ms),Function: 
+2025-11-07 16:54:56.365,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1500ms),Function: 
+2025-11-07 16:55:00.648,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 16:55:00.718,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: FAN D' (Elapsed: 500ms),Function: 
+2025-11-07 16:55:00.718,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'ISABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:55:00.718,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1500ms),Function: 
+2025-11-07 16:55:00.718,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1500ms),Function: 
+2025-11-07 16:55:05.114,SYSTEM,Robot,INFO,,,,0,Desconectando robot,
+2025-11-07 16:55:05.414,SYSTEM,Robot,INFO,,,,0,Robot desconectado,
+2025-11-07 16:55:15.222,SYSTEM,ConnectRobotMethod,INFO,,,,0,Intento de conexión robot,Puerto: /dev/ttyUSB0 Baud: 115200
+2025-11-07 16:55:15.224,SYSTEM,Robot,INFO,,,,0,Intentando conectar robot: /dev/ttyUSB0 Baud: 115200,
+2025-11-07 16:55:18.107,SYSTEM,Robot,DEBUG,,,,0,Puerto serie abierto exitosamente,Function:  | Esperando banner/sincronización
+2025-11-07 16:55:18.108,SYSTEM,Robot,DEBUG,,,,0,Banner recibido: '',Function: 
+2025-11-07 16:55:18.108,SYSTEM,Robot,DEBUG,,,,0,"Banner vacío, enviando línea en blanco",Function: 
+2025-11-07 16:55:18.114,SYSTEM,Robot,DEBUG,,,,0,Segundo intento de banner: 'INFO: ROBOT ONLINE',Function: 
+2025-11-07 16:55:18.114,SYSTEM,Robot,INFO,,,,0,Robot conectado exitosamente en puerto: /dev/ttyUSB0,
+2025-11-07 16:55:18.114,SYSTEM,ConnectRobotMethod,INFO,,,,0,Robot conectado exitosamente con tracking habilitado,
+2025-11-07 16:55:18.114,REQUEST,XMLRPCServer,INFO,connectRobot,unknown,127.0.0.1,200,Petición procesada,Robot connected successfully to /dev/ttyUSB0 with tracking enabled
+2025-11-07 16:55:55.729,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M17' (Timeout: 3000ms),Function: 
+2025-11-07 16:55:55.827,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: SEND ' (Elapsed: 500ms),Function: 
+2025-11-07 16:55:55.827,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'G28 TO CALI' (Elapsed: 1000ms),Function: 
+2025-11-07 16:55:55.828,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'BRATE' (Elapsed: 1500ms),Function: 
+2025-11-07 16:55:55.828,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'ERROR: COMM' (Elapsed: 2000ms),Function: 
+2025-11-07 16:56:02.415,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G28' (Timeout: 15000ms),Function: 
+2025-11-07 16:56:02.523,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'AND NOT REC' (Elapsed: 500ms),Function: 
+2025-11-07 16:56:02.524,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OGNIZED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:56:02.524,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 1500ms),Function: 
+2025-11-07 16:56:02.524,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S ENABLED' (Elapsed: 2000ms),Function: 
+2025-11-07 16:56:02.524,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 2500ms),Function: 
+2025-11-07 16:56:02.524,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 2500ms),Function: 
+2025-11-07 16:56:06.762,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 16:56:06.766,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: HOMIN' (Elapsed: 500ms),Function: 
+2025-11-07 16:56:06.767,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'G COMPLETE' (Elapsed: 1000ms),Function: 
+2025-11-07 16:56:06.767,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 2000ms),Function: 
+2025-11-07 16:56:06.767,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 2000ms),Function: 
+2025-11-07 16:56:08.482,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M17' (Timeout: 3000ms),Function: 
+2025-11-07 16:56:08.486,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 500ms),Function: 
+2025-11-07 16:56:08.486,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S DISABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:56:08.486,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 2000ms),Function: 
+2025-11-07 16:56:08.486,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 2000ms),Function: 
+2025-11-07 16:56:10.274,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M106' (Timeout: 5000ms),Function: 
+2025-11-07 16:56:10.279,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 500ms),Function: 
+2025-11-07 16:56:10.280,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S ENABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:56:10.280,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1500ms),Function: 
+2025-11-07 16:56:10.281,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1500ms),Function: 
+2025-11-07 16:56:12.872,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M107' (Timeout: 5000ms),Function: 
+2025-11-07 16:56:12.974,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: FAN E' (Elapsed: 500ms),Function: 
+2025-11-07 16:56:12.975,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'NABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:56:12.975,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1500ms),Function: 
+2025-11-07 16:56:12.975,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1500ms),Function: 
+2025-11-07 16:56:14.756,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 16:56:14.760,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: FAN D' (Elapsed: 500ms),Function: 
+2025-11-07 16:56:14.760,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'ISABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:56:14.760,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1500ms),Function: 
+2025-11-07 16:56:14.760,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1500ms),Function: 
+2025-11-07 16:56:16.509,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M17' (Timeout: 3000ms),Function: 
+2025-11-07 16:56:16.513,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 500ms),Function: 
+2025-11-07 16:56:16.514,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S DISABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:56:16.514,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 2000ms),Function: 
+2025-11-07 16:56:16.514,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 2000ms),Function: 
+2025-11-07 16:56:17.812,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 16:56:17.816,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 500ms),Function: 
+2025-11-07 16:56:17.816,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S ENABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:56:17.816,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1500ms),Function: 
+2025-11-07 16:56:17.816,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1500ms),Function: 
+2025-11-07 16:56:49.503,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M17' (Timeout: 3000ms),Function: 
+2025-11-07 16:56:49.523,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 500ms),Function: 
+2025-11-07 16:56:49.523,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S DISABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:56:49.523,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 2000ms),Function: 
+2025-11-07 16:56:49.523,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 2000ms),Function: 
+2025-11-07 16:56:51.558,SYSTEM,Robot,INFO,,,,0,Desconectando robot,
+2025-11-07 16:56:51.580,SYSTEM,Robot,INFO,,,,0,Robot desconectado,
+2025-11-07 16:56:58.910,SYSTEM,ConnectRobotMethod,INFO,,,,0,Intento de conexión robot,Puerto: /dev/ttyUSB0 Baud: 115200
+2025-11-07 16:56:58.910,SYSTEM,Robot,INFO,,,,0,Intentando conectar robot: /dev/ttyUSB0 Baud: 115200,
+2025-11-07 16:57:00.931,SYSTEM,Robot,DEBUG,,,,0,Puerto serie abierto exitosamente,Function:  | Esperando banner/sincronización
+2025-11-07 16:57:00.931,SYSTEM,Robot,DEBUG,,,,0,Banner recibido: '',Function: 
+2025-11-07 16:57:00.931,SYSTEM,Robot,DEBUG,,,,0,"Banner vacío, enviando línea en blanco",Function: 
+2025-11-07 16:57:00.937,SYSTEM,Robot,DEBUG,,,,0,Segundo intento de banner: 'INFO: ROBOT ONLINE',Function: 
+2025-11-07 16:57:00.937,SYSTEM,Robot,INFO,,,,0,Robot conectado exitosamente en puerto: /dev/ttyUSB0,
+2025-11-07 16:57:00.937,SYSTEM,ConnectRobotMethod,INFO,,,,0,Robot conectado exitosamente con tracking habilitado,
+2025-11-07 16:57:00.937,REQUEST,XMLRPCServer,INFO,connectRobot,unknown,127.0.0.1,200,Petición procesada,Robot connected successfully to /dev/ttyUSB0 with tracking enabled
+2025-11-07 16:57:03.178,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 16:57:03.286,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: SEND ' (Elapsed: 500ms),Function: 
+2025-11-07 16:57:03.286,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'G28 TO CALI' (Elapsed: 1000ms),Function: 
+2025-11-07 16:57:03.286,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'BRATE' (Elapsed: 1500ms),Function: 
+2025-11-07 16:57:03.286,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'ERROR: COMM' (Elapsed: 2000ms),Function: 
+2025-11-07 16:57:08.444,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M17' (Timeout: 3000ms),Function: 
+2025-11-07 16:57:08.638,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'AND NOT REC' (Elapsed: 500ms),Function: 
+2025-11-07 16:57:08.638,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OGNIZED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:57:08.638,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 1500ms),Function: 
+2025-11-07 16:57:08.639,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S DISABLED' (Elapsed: 2000ms),Function: 
+2025-11-07 16:57:08.639,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 3000ms),Function: 
+2025-11-07 16:57:08.639,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 3000ms),Function: 
+2025-11-07 16:57:10.376,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M106' (Timeout: 5000ms),Function: 
+2025-11-07 16:57:10.380,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 500ms),Function: 
+2025-11-07 16:57:10.380,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S ENABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:57:10.380,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1500ms),Function: 
+2025-11-07 16:57:10.380,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1500ms),Function: 
+2025-11-07 16:57:13.446,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 16:57:13.734,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: FAN E' (Elapsed: 500ms),Function: 
+2025-11-07 16:57:13.734,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'NABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:57:13.734,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 1500ms),Function: 
+2025-11-07 16:57:13.735,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 1500ms),Function: 
+2025-11-07 16:57:17.237,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M107' (Timeout: 5000ms),Function: 
+2025-11-07 16:57:17.430,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'INFO: MOTOR' (Elapsed: 500ms),Function: 
+2025-11-07 16:57:17.431,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'S DISABLED' (Elapsed: 1000ms),Function: 
+2025-11-07 16:57:17.431,SYSTEM,Robot,DEBUG,,,,0,Respuesta recibida: 'OK' (Elapsed: 2000ms),Function: 
+2025-11-07 16:57:17.431,SYSTEM,Robot,DEBUG,,,,0,Comando ejecutado exitosamente (Tiempo: 2000ms),Function: 
+2025-11-07 17:12:04.239,SYSTEM,MainServer,INFO,,,,0,Señal de terminación recibida,Signal: 2
+2025-11-07 17:12:04.261,SYSTEM,MainServer,INFO,,,,0,Servidor detenido correctamente,
+2025-11-07 17:12:05.587,SYSTEM,CSVLogger,INFO,,,,0,Logger finalizando,Cerrando archivo de log
+2025-11-07 17:14:25.469,SYSTEM,CSVLogger,INFO,,,,0,Logger inicializado correctamente,Archivo: logs/server_activity.csv
+2025-11-07 17:14:25.477,SYSTEM,MainServer,INFO,,,,0,Iniciando servidor Robot XML-RPC,Arguments: 2
+2025-11-07 17:14:25.477,SYSTEM,MainServer,DEBUG,,,,0,Argumento de línea de comandos,Function: main | argv[0] = ./servidor_rpc
+2025-11-07 17:14:25.477,SYSTEM,MainServer,DEBUG,,,,0,Argumento de línea de comandos,Function: main | argv[1] = 8080
+2025-11-07 17:14:25.477,SYSTEM,MainServer,INFO,,,,0,Manejadores de señales configurados,"SIGINT, SIGTERM"
+2025-11-07 17:14:25.477,SYSTEM,MainServer,INFO,,,,0,Creando controlador del servidor,
+2025-11-07 17:14:25.477,SYSTEM,MainServer,INFO,,,,0,Iniciando ejecución del servidor,
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: ServerTest - Respondo quien soy cuando no hay argumentos
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: Eco - Diga algo y recibira un saludo
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: Sumar - Indique varios numeros reales separados por espacio
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: connectRobot - Conecta al puerto serie del robot
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: disconnectRobot - Desconecta el puerto serie
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: setMode - Configura modo manual/absoluto
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: enableMotors - Enciende/Apaga motores
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: home - Homing del robot
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: move - Movimiento cartesiano
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: endEffector - Control gripper/endeffector
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: executeGcode - Ejecuta código G-code en el robot
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: getPosition - Obtener posición actual del robot
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: setPositionTracking - Habilitar/deshabilitar tracking de posición
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: isConnected - Indica si el robot está conectado
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: getRobotStatus - Obtiene estado completo del robot
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: authLogin - Autenticación de usuarios
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: authLogout - Logout de usuarios
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: userCreate - Crear nuevo usuario
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: userList - Listar usuarios
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: userInfo - Información de usuario
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: userUpdate - Actualizar usuario
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: userDelete - Eliminar usuario
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: routineCreate - Crear nueva rutina G-code
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: routineList - Listar rutinas G-code
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: routineGet - Obtener rutina G-code
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: routineUpdate - Actualizar rutina G-code
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: routineDelete - Eliminar rutina G-code
+2025-11-07 17:14:26.824,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: generateGcodeFromMovements - Generar G-code desde movimientos y guardarlo como rutina
+2025-11-07 17:15:39.145,SYSTEM,MoveMethod,WARNING,,,,0,Intento de movimiento sin robot conectado,
+2025-11-07 17:15:39.156,REQUEST,XMLRPCServer,INFO,move,unknown,127.0.0.1,409,Petición procesada,Robot not connected
+2025-11-07 17:15:51.661,SYSTEM,ConnectRobotMethod,INFO,,,,0,Intento de conexión robot,Puerto: /dev/ttyUSB0 Baud: 9600
+2025-11-07 17:15:51.661,SYSTEM,Robot,INFO,,,,0,Intentando conectar robot: /dev/ttyUSB0 Baud: 9600,
+2025-11-07 17:15:53.983,SYSTEM,Robot,DEBUG,,,,0,Puerto serie abierto exitosamente,Function:  | Esperando banner/sincronización
+2025-11-07 17:15:56.855,SYSTEM,Robot,DEBUG,,,,0,Banner recibido: '��',Function: 
+2025-11-07 17:15:56.855,SYSTEM,Robot,INFO,,,,0,Robot conectado exitosamente en puerto: /dev/ttyUSB0,
+2025-11-07 17:15:56.855,SYSTEM,ConnectRobotMethod,INFO,,,,0,Robot conectado exitosamente con tracking habilitado,
+2025-11-07 17:15:56.855,REQUEST,XMLRPCServer,INFO,connectRobot,unknown,127.0.0.1,200,Petición procesada,Robot connected successfully to /dev/ttyUSB0 with tracking enabled
+2025-11-07 17:16:00.843,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M17' (Timeout: 3000ms),Function: 
+2025-11-07 17:16:17.284,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M106' (Timeout: 5000ms),Function: 
+2025-11-07 17:16:28.891,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M106' (Timeout: 5000ms),Function: 
+2025-11-07 17:16:38.761,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 17:16:58.090,SYSTEM,MoveMethod,DEBUG,,,,0,Ejecutando movimiento,Function: execute | X:10.000000 Y:10.000000 Z:10.000000 Vel:1000.000000
+2025-11-07 17:16:58.104,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G0 X10.000 Y10.000 Z10.000 F1000.000' (Timeout: 15000ms),Function: 
+2025-11-07 17:17:15.886,SYSTEM,MoveMethod,WARNING,,,,0,Fallo en ejecución de movimiento,
+2025-11-07 17:17:15.886,REQUEST,XMLRPCServer,INFO,move,unknown,127.0.0.1,500,Petición procesada,Movement failed
+2025-11-07 17:29:48.832,SYSTEM,AuthLoginMethod,DEBUG,,,,0,Intento de login,Function: execute | Usuario: admin
+2025-11-07 17:29:50.184,SYSTEM,AuthLoginMethod,INFO,,,,0,Login exitoso para usuario: admin (ID: 1),
+2025-11-07 17:29:50.184,REQUEST,XMLRPCServer,INFO,authLogin,admin,127.0.0.1,200,Petición procesada,Login successful - Role: ADMIN
+2025-11-07 17:29:53.744,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M17' (Timeout: 3000ms),Function: 
+2025-11-07 17:30:28.612,SYSTEM,MoveMethod,DEBUG,,,,0,Ejecutando movimiento,Function: execute | X:100.000000 Y:100.000000 Z:100.000000 Vel:1000.000000
+2025-11-07 17:30:28.614,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G0 X100.000 Y100.000 Z100.000 F1000.000' (Timeout: 15000ms),Function: 
+2025-11-07 17:30:45.976,SYSTEM,MoveMethod,WARNING,,,,0,Fallo en ejecución de movimiento,
+2025-11-07 17:30:45.977,REQUEST,XMLRPCServer,INFO,move,unknown,127.0.0.1,500,Petición procesada,Movement failed
+2025-11-07 17:30:45.978,SYSTEM,MoveMethod,DEBUG,,,,0,Ejecutando movimiento,Function: execute | X:100.000000 Y:100.000000 Z:100.000000 Vel:1000.000000
+2025-11-07 17:30:45.978,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G0 X100.000 Y100.000 Z100.000 F1000.000' (Timeout: 15000ms),Function: 
+2025-11-07 17:31:03.326,SYSTEM,MoveMethod,WARNING,,,,0,Fallo en ejecución de movimiento,
+2025-11-07 17:31:03.327,REQUEST,XMLRPCServer,INFO,move,unknown,127.0.0.1,500,Petición procesada,Movement failed
+2025-11-07 17:31:03.332,SYSTEM,MoveMethod,DEBUG,,,,0,Ejecutando movimiento,Function: execute | X:100.000000 Y:100.000000 Z:100.000000 Vel:1000.000000
+2025-11-07 17:31:03.336,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G0 X100.000 Y100.000 Z100.000 F1000.000' (Timeout: 15000ms),Function: 
+2025-11-07 17:31:04.059,SYSTEM,MainServer,INFO,,,,0,Señal de terminación recibida,Signal: 2
+2025-11-07 17:31:04.059,SYSTEM,MainServer,INFO,,,,0,Servidor detenido correctamente,
+2025-11-07 17:31:04.145,SYSTEM,CSVLogger,INFO,,,,0,Logger finalizando,Cerrando archivo de log
+2025-11-07 17:31:55.284,SYSTEM,CSVLogger,INFO,,,,0,Logger inicializado correctamente,Archivo: logs/server_activity.csv
+2025-11-07 17:31:55.287,SYSTEM,MainServer,INFO,,,,0,Iniciando servidor Robot XML-RPC,Arguments: 2
+2025-11-07 17:31:55.287,SYSTEM,MainServer,DEBUG,,,,0,Argumento de línea de comandos,Function: main | argv[0] = ./servidor_rpc
+2025-11-07 17:31:55.287,SYSTEM,MainServer,DEBUG,,,,0,Argumento de línea de comandos,Function: main | argv[1] = 8080
+2025-11-07 17:31:55.287,SYSTEM,MainServer,INFO,,,,0,Manejadores de señales configurados,"SIGINT, SIGTERM"
+2025-11-07 17:31:55.287,SYSTEM,MainServer,INFO,,,,0,Creando controlador del servidor,
+2025-11-07 17:31:55.287,SYSTEM,MainServer,INFO,,,,0,Iniciando ejecución del servidor,
+2025-11-07 17:31:55.603,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: ServerTest - Respondo quien soy cuando no hay argumentos
+2025-11-07 17:31:55.603,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: Eco - Diga algo y recibira un saludo
+2025-11-07 17:31:55.603,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: Sumar - Indique varios numeros reales separados por espacio
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: connectRobot - Conecta al puerto serie del robot
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: disconnectRobot - Desconecta el puerto serie
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: setMode - Configura modo manual/absoluto
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: enableMotors - Enciende/Apaga motores
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: home - Homing del robot
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: move - Movimiento cartesiano
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: endEffector - Control gripper/endeffector
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: executeGcode - Ejecuta código G-code en el robot
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: getPosition - Obtener posición actual del robot
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: setPositionTracking - Habilitar/deshabilitar tracking de posición
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: isConnected - Indica si el robot está conectado
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: getRobotStatus - Obtiene estado completo del robot
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: authLogin - Autenticación de usuarios
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: authLogout - Logout de usuarios
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: userCreate - Crear nuevo usuario
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: userList - Listar usuarios
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: userInfo - Información de usuario
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: userUpdate - Actualizar usuario
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: userDelete - Eliminar usuario
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: routineCreate - Crear nueva rutina G-code
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: routineList - Listar rutinas G-code
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: routineGet - Obtener rutina G-code
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: routineUpdate - Actualizar rutina G-code
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: routineDelete - Eliminar rutina G-code
+2025-11-07 17:31:55.604,SYSTEM,ServiceMethod,DEBUG,,,,0,Método registrado,Method: generateGcodeFromMovements - Generar G-code desde movimientos y guardarlo como rutina
+2025-11-07 17:32:19.680,SYSTEM,ConnectRobotMethod,INFO,,,,0,Intento de conexión robot,Puerto: /dev/ttyUSB0 Baud: 9600
+2025-11-07 17:32:19.682,SYSTEM,Robot,INFO,,,,0,Intentando conectar robot: /dev/ttyUSB0 Baud: 9600,
+2025-11-07 17:32:21.856,SYSTEM,Robot,DEBUG,,,,0,Puerto serie abierto exitosamente,Function:  | Esperando banner/sincronización
+2025-11-07 17:32:24.731,SYSTEM,Robot,DEBUG,,,,0,Banner recibido: 'R1'\',Function: 
+2025-11-07 17:32:24.734,SYSTEM,Robot,INFO,,,,0,Robot conectado exitosamente en puerto: /dev/ttyUSB0,
+2025-11-07 17:32:24.734,SYSTEM,ConnectRobotMethod,INFO,,,,0,Robot conectado exitosamente con tracking habilitado,
+2025-11-07 17:32:24.735,REQUEST,XMLRPCServer,INFO,connectRobot,unknown,127.0.0.1,200,Petición procesada,Robot connected successfully to /dev/ttyUSB0 with tracking enabled
+2025-11-07 17:32:27.657,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M17' (Timeout: 3000ms),Function: 
+2025-11-07 17:32:55.967,SYSTEM,MoveMethod,DEBUG,,,,0,Ejecutando movimiento,Function: execute | X:10.000000 Y:10.000000 Z:10.000000 Vel:1000.000000
+2025-11-07 17:32:55.969,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G0 X10.000 Y10.000 Z10.000 F1000.000' (Timeout: 15000ms),Function: 
+2025-11-07 17:33:13.449,SYSTEM,MoveMethod,WARNING,,,,0,Fallo en ejecución de movimiento,
+2025-11-07 17:33:13.449,REQUEST,XMLRPCServer,INFO,move,unknown,127.0.0.1,500,Petición procesada,Movement failed
+2025-11-07 17:33:13.455,SYSTEM,MoveMethod,DEBUG,,,,0,Ejecutando movimiento,Function: execute | X:10.000000 Y:10.000000 Z:10.000000 Vel:1000.000000
+2025-11-07 17:33:13.455,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G0 X10.000 Y10.000 Z10.000 F1000.000' (Timeout: 15000ms),Function: 
+2025-11-07 17:33:31.135,SYSTEM,MoveMethod,WARNING,,,,0,Fallo en ejecución de movimiento,
+2025-11-07 17:33:31.135,REQUEST,XMLRPCServer,INFO,move,unknown,127.0.0.1,500,Petición procesada,Movement failed
+2025-11-07 17:34:00.804,SYSTEM,MoveMethod,DEBUG,,,,0,Ejecutando movimiento,Function: execute | X:15.000000 Y:15.000000 Z:15.000000 Vel:1000.000000
+2025-11-07 17:34:00.804,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G0 X15.000 Y15.000 Z15.000 F1000.000' (Timeout: 15000ms),Function: 
+2025-11-07 17:34:18.133,SYSTEM,MoveMethod,WARNING,,,,0,Fallo en ejecución de movimiento,
+2025-11-07 17:34:18.133,REQUEST,XMLRPCServer,INFO,move,unknown,127.0.0.1,500,Petición procesada,Movement failed
+2025-11-07 17:34:26.729,SYSTEM,MoveMethod,DEBUG,,,,0,Ejecutando movimiento,Function: execute | X:15.000000 Y:15.000000 Z:15.000000 Vel:1000.000000
+2025-11-07 17:34:26.729,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G0 X15.000 Y15.000 Z15.000 F1000.000' (Timeout: 15000ms),Function: 
+2025-11-07 17:34:44.502,SYSTEM,MoveMethod,WARNING,,,,0,Fallo en ejecución de movimiento,
+2025-11-07 17:34:44.502,REQUEST,XMLRPCServer,INFO,move,unknown,127.0.0.1,500,Petición procesada,Movement failed
+2025-11-07 17:35:01.791,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 17:35:10.630,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M17' (Timeout: 3000ms),Function: 
+2025-11-07 17:35:17.736,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 17:35:36.220,SYSTEM,MoveMethod,DEBUG,,,,0,Ejecutando movimiento,Function: execute | X:10.000000 Y:10.000000 Z:10.000000 Vel:1000.000000
+2025-11-07 17:35:36.220,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G0 X10.000 Y10.000 Z10.000 F1000.000' (Timeout: 15000ms),Function: 
+2025-11-07 17:35:54.792,SYSTEM,MoveMethod,WARNING,,,,0,Fallo en ejecución de movimiento,
+2025-11-07 17:35:54.794,REQUEST,XMLRPCServer,INFO,move,unknown,127.0.0.1,500,Petición procesada,Movement failed
+2025-11-07 17:36:34.655,SYSTEM,MoveMethod,DEBUG,,,,0,Ejecutando movimiento,Function: execute | X:15.000000 Y:15.000000 Z:15.000000 Vel:1000.000000
+2025-11-07 17:36:34.656,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G0 X15.000 Y15.000 Z15.000 F1000.000' (Timeout: 15000ms),Function: 
+2025-11-07 17:36:51.907,SYSTEM,MoveMethod,WARNING,,,,0,Fallo en ejecución de movimiento,
+2025-11-07 17:36:51.908,REQUEST,XMLRPCServer,INFO,move,unknown,127.0.0.1,500,Petición procesada,Movement failed
+2025-11-07 17:36:56.824,SYSTEM,MoveMethod,DEBUG,,,,0,Ejecutando movimiento,Function: execute | X:15.000000 Y:15.000000 Z:15.000000 Vel:1000.000000
+2025-11-07 17:36:56.824,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G0 X15.000 Y15.000 Z15.000 F1000.000' (Timeout: 15000ms),Function: 
+2025-11-07 17:37:14.263,SYSTEM,MoveMethod,WARNING,,,,0,Fallo en ejecución de movimiento,
+2025-11-07 17:37:14.263,REQUEST,XMLRPCServer,INFO,move,unknown,127.0.0.1,500,Petición procesada,Movement failed
+2025-11-07 17:37:18.453,SYSTEM,Robot,INFO,,,,0,Desconectando robot,
+2025-11-07 17:37:19.425,SYSTEM,Robot,INFO,,,,0,Robot desconectado,
+2025-11-07 17:37:25.995,SYSTEM,ConnectRobotMethod,INFO,,,,0,Intento de conexión robot,Puerto: /dev/ttyUSB0 Baud: 9600
+2025-11-07 17:37:25.998,SYSTEM,Robot,INFO,,,,0,Intentando conectar robot: /dev/ttyUSB0 Baud: 9600,
+2025-11-07 17:37:28.120,SYSTEM,Robot,DEBUG,,,,0,Puerto serie abierto exitosamente,Function:  | Esperando banner/sincronización
+2025-11-07 17:37:30.997,SYSTEM,Robot,DEBUG,,,,0,Banner recibido: 'Z�!X',Function: 
+2025-11-07 17:37:30.997,SYSTEM,Robot,INFO,,,,0,Robot conectado exitosamente en puerto: /dev/ttyUSB0,
+2025-11-07 17:37:30.997,SYSTEM,ConnectRobotMethod,INFO,,,,0,Robot conectado exitosamente con tracking habilitado,
+2025-11-07 17:37:30.997,REQUEST,XMLRPCServer,INFO,connectRobot,unknown,127.0.0.1,200,Petición procesada,Robot connected successfully to /dev/ttyUSB0 with tracking enabled
+2025-11-07 17:37:46.523,SYSTEM,MoveMethod,DEBUG,,,,0,Ejecutando movimiento,Function: execute | X:15.000000 Y:15.000000 Z:15.000000 Vel:1000.000000
+2025-11-07 17:37:46.524,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G0 X15.000 Y15.000 Z15.000 F1000.000' (Timeout: 15000ms),Function: 
+2025-11-07 17:38:04.299,SYSTEM,MoveMethod,WARNING,,,,0,Fallo en ejecución de movimiento,
+2025-11-07 17:38:04.299,REQUEST,XMLRPCServer,INFO,move,unknown,127.0.0.1,500,Petición procesada,Movement failed
+2025-11-07 17:38:31.963,SYSTEM,MoveMethod,DEBUG,,,,0,Ejecutando movimiento,Function: execute | X:15.000000 Y:15.000000 Z:15.000000 Vel:1000.000000
+2025-11-07 17:38:31.963,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G0 X15.000 Y15.000 Z15.000 F1000.000' (Timeout: 15000ms),Function: 
+2025-11-07 17:38:49.335,SYSTEM,MoveMethod,WARNING,,,,0,Fallo en ejecución de movimiento,
+2025-11-07 17:38:49.335,REQUEST,XMLRPCServer,INFO,move,unknown,127.0.0.1,500,Petición procesada,Movement failed
+2025-11-07 17:39:28.800,SYSTEM,Robot,INFO,,,,0,Desconectando robot,
+2025-11-07 17:39:28.874,SYSTEM,Robot,INFO,,,,0,Robot desconectado,
+2025-11-07 17:39:32.600,SYSTEM,ConnectRobotMethod,INFO,,,,0,Intento de conexión robot,Puerto: /dev/ttyUSB0 Baud: 9600
+2025-11-07 17:39:32.600,SYSTEM,Robot,INFO,,,,0,Intentando conectar robot: /dev/ttyUSB0 Baud: 9600,
+2025-11-07 17:39:35.568,SYSTEM,Robot,DEBUG,,,,0,Puerto serie abierto exitosamente,Function:  | Esperando banner/sincronización
+2025-11-07 17:39:38.439,SYSTEM,Robot,DEBUG,,,,0,Banner recibido: '��',Function: 
+2025-11-07 17:39:38.439,SYSTEM,Robot,INFO,,,,0,Robot conectado exitosamente en puerto: /dev/ttyUSB0,
+2025-11-07 17:39:38.439,SYSTEM,ConnectRobotMethod,INFO,,,,0,Robot conectado exitosamente con tracking habilitado,
+2025-11-07 17:39:38.439,REQUEST,XMLRPCServer,INFO,connectRobot,unknown,127.0.0.1,200,Petición procesada,Robot connected successfully to /dev/ttyUSB0 with tracking enabled
+2025-11-07 17:40:00.334,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G28' (Timeout: 15000ms),Function: 
+2025-11-07 17:41:28.953,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M17' (Timeout: 3000ms),Function: 
+2025-11-07 17:41:48.893,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 17:42:08.247,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M17' (Timeout: 3000ms),Function: 
+2025-11-07 17:42:57.327,SYSTEM,AuthLoginMethod,DEBUG,,,,0,Intento de login,Function: execute | Usuario: admin
+2025-11-07 17:42:57.876,SYSTEM,AuthLoginMethod,INFO,,,,0,Login exitoso para usuario: admin (ID: 1),
+2025-11-07 17:42:57.877,REQUEST,XMLRPCServer,INFO,authLogin,admin,127.0.0.1,200,Petición procesada,Login successful - Role: ADMIN
+2025-11-07 17:43:09.305,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 17:49:19.959,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M17' (Timeout: 3000ms),Function: 
+2025-11-07 17:49:34.211,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 17:54:14.932,SYSTEM,Robot,INFO,,,,0,Desconectando robot,
+2025-11-07 17:54:15.098,SYSTEM,Robot,INFO,,,,0,Robot desconectado,
+2025-11-07 17:54:39.887,SYSTEM,ConnectRobotMethod,INFO,,,,0,Intento de conexión robot,Puerto: /dev/ttyUSB0 Baud: 9600
+2025-11-07 17:54:39.887,SYSTEM,Robot,INFO,,,,0,Intentando conectar robot: /dev/ttyUSB0 Baud: 9600,
+2025-11-07 17:54:42.800,SYSTEM,Robot,DEBUG,,,,0,Puerto serie abierto exitosamente,Function:  | Esperando banner/sincronización
+2025-11-07 17:54:45.672,SYSTEM,Robot,DEBUG,,,,0,Banner recibido: '{$P�',Function: 
+2025-11-07 17:54:45.672,SYSTEM,Robot,INFO,,,,0,Robot conectado exitosamente en puerto: /dev/ttyUSB0,
+2025-11-07 17:54:45.672,SYSTEM,ConnectRobotMethod,INFO,,,,0,Robot conectado exitosamente con tracking habilitado,
+2025-11-07 17:54:45.672,REQUEST,XMLRPCServer,INFO,connectRobot,unknown,127.0.0.1,200,Petición procesada,Robot connected successfully to /dev/ttyUSB0 with tracking enabled
+2025-11-07 17:55:02.555,SYSTEM,MoveMethod,DEBUG,,,,0,Ejecutando movimiento,Function: execute | X:10.000000 Y:10.000000 Z:10.000000 Vel:10.000000
+2025-11-07 17:55:02.560,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G0 X10.000 Y10.000 Z10.000 F10.000' (Timeout: 15000ms),Function: 
+2025-11-07 17:55:19.973,SYSTEM,MoveMethod,WARNING,,,,0,Fallo en ejecución de movimiento,
+2025-11-07 17:55:19.973,REQUEST,XMLRPCServer,INFO,move,unknown,127.0.0.1,500,Petición procesada,Movement failed
+2025-11-07 17:55:34.810,SYSTEM,MoveMethod,DEBUG,,,,0,Ejecutando movimiento,Function: execute | X:10.000000 Y:10.000000 Z:10.000000 Vel:1000.000000
+2025-11-07 17:55:34.811,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'G0 X10.000 Y10.000 Z10.000 F1000.000' (Timeout: 15000ms),Function: 
+2025-11-07 17:55:52.339,SYSTEM,MoveMethod,WARNING,,,,0,Fallo en ejecución de movimiento,
+2025-11-07 17:55:52.340,REQUEST,XMLRPCServer,INFO,move,unknown,127.0.0.1,500,Petición procesada,Movement failed
+2025-11-07 17:57:39.318,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M17' (Timeout: 3000ms),Function: 
+2025-11-07 17:58:07.787,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M18' (Timeout: 3000ms),Function: 
+2025-11-07 17:58:14.289,SYSTEM,Robot,DEBUG,,,,0,Enviando comando: 'M17' (Timeout: 3000ms),Function: 
+2025-11-07 17:58:47.257,SYSTEM,Robot,INFO,,,,0,Desconectando robot,
+2025-11-07 17:58:47.301,SYSTEM,Robot,INFO,,,,0,Robot desconectado,
+2025-11-07 17:58:51.481,SYSTEM,ConnectRobotMethod,INFO,,,,0,Intento de conexión robot,Puerto: /dev/ttyUSB0 Baud: 9600
+2025-11-07 17:58:51.482,SYSTEM,Robot,INFO,,,,0,Intentando conectar robot: /dev/ttyUSB0 Baud: 9600,
+2025-11-07 17:58:53.656,SYSTEM,Robot,DEBUG,,,,0,Puerto serie abierto exitosamente,Function:  | Esperando banner/sincronización
+2025-11-07 17:58:56.527,SYSTEM,Robot,DEBUG,,,,0,Banner recibido: '����',Function: 
+2025-11-07 17:58:56.529,SYSTEM,Robot,INFO,,,,0,Robot conectado exitosamente en puerto: /dev/ttyUSB0,
+2025-11-07 17:58:56.529,SYSTEM,ConnectRobotMethod,INFO,,,,0,Robot conectado exitosamente con tracking habilitado,
+2025-11-07 17:58:56.530,REQUEST,XMLRPCServer,INFO,connectRobot,unknown,127.0.0.1,200,Petición procesada,Robot connected successfully to /dev/ttyUSB0 with tracking enabled

@@ -108,17 +108,18 @@
                     </div>
                     
                     <div class="row mb-3">
-                        <div class="col-6">
-                            <button type="button" class="btn btn-success w-100" onclick="showConnectModal()">
-                                <i class="bi bi-plug"></i> Conectar Robot
-                            </button>
-                        </div>
-                        <div class="col-6">
-                            <form method="post" action="/robot/disconnect" class="d-inline w-100">
-                                <button type="submit" class="btn btn-danger w-100">
-                                    <i class="bi bi-plug-fill"></i> Desconectar
+                        <div class="col-12">
+                            <% if (status && status.connected) { %>
+                                <form method="post" action="/robot/disconnect" class="d-inline w-100">
+                                    <button type="submit" class="btn btn-danger w-100">
+                                        <i class="bi bi-plug-fill"></i> Desconectar
+                                    </button>
+                                </form>
+                            <% } else { %>
+                                <button type="button" class="btn btn-success w-100" onclick="showConnectModal()">
+                                    <i class="bi bi-plug"></i> Conectar Robot
                                 </button>
-                            </form>
+                            <% } %>
                         </div>
                     </div>
 
@@ -138,40 +139,32 @@
                     </div>
                     
                     <div class="row mb-3">
-                        <div class="col-6">
-                            <form method="post" action="/robot/motors" class="d-inline">
-                                <input type="hidden" name="on" value="1">
-                                <button type="submit" class="btn btn-success w-100">
-                                    <i class="bi bi-power"></i> Motores ON
-                                </button>
-                            </form>
-                        </div>
-                        <div class="col-6">
-                            <form method="post" action="/robot/motors" class="d-inline">
-                                <input type="hidden" name="on" value="0">
-                                <button type="submit" class="btn btn-outline-danger w-100">
-                                    <i class="bi bi-power"></i> Motores OFF
-                                </button>
-                            </form>
+                        <div class="col-12">
+                            <% if (status && typeof status.motorsOn !== 'undefined') { %>
+                                <form method="post" action="/robot/motors" class="d-inline w-100">
+                                    <input type="hidden" name="on" value="<%= status.motorsOn ? 0 : 1 %>">
+                                    <button type="submit" class="btn <%= status.motorsOn ? 'btn-outline-danger' : 'btn-success' %> w-100">
+                                        <i class="bi bi-power"></i> <%= status.motorsOn ? 'Motores OFF' : 'Motores ON' %>
+                                    </button>
+                                </form>
+                            <% } else { %>
+                                <button type="button" class="btn btn-secondary w-100" disabled>Estado motores desconocido</button>
+                            <% } %>
                         </div>
                     </div>
 
                     <div class="row">
-                        <div class="col-6">
-                            <form method="post" action="/robot/gripper" class="d-inline">
-                                <input type="hidden" name="on" value="1">
-                                <button type="submit" class="btn btn-info w-100">
-                                    <i class="bi bi-gear"></i> Gripper ON
-                                </button>
-                            </form>
-                        </div>
-                        <div class="col-6">
-                            <form method="post" action="/robot/gripper" class="d-inline">
-                                <input type="hidden" name="on" value="0">
-                                <button type="submit" class="btn btn-outline-secondary w-100">
-                                    <i class="bi bi-gear"></i> Gripper OFF
-                                </button>
-                            </form>
+                        <div class="col-12">
+                            <% if (status && typeof status.gripperOn !== 'undefined') { %>
+                                <form method="post" action="/robot/gripper" class="d-inline w-100">
+                                    <input type="hidden" name="on" value="<%= status.gripperOn ? 0 : 1 %>">
+                                    <button type="submit" class="btn <%= status.gripperOn ? 'btn-outline-secondary' : 'btn-info' %> w-100">
+                                        <i class="bi bi-gear"></i> <%= status.gripperOn ? 'Gripper OFF' : 'Gripper ON' %>
+                                    </button>
+                                </form>
+                            <% } else { %>
+                                <button type="button" class="btn btn-secondary w-100" disabled>Estado gripper desconocido</button>
+                            <% } %>
                         </div>
                     </div>
                 </div>
@@ -210,7 +203,7 @@
                     <div class="mb-3">
                         <label for="baudrate" class="form-label">Velocidad (Baudrate)</label>
                         <select class="form-select" id="baudrate" name="baudrate" required>
-                            <option value="9600" selected>9600 bps</option>
+                            <option value="9600" selected>115200 bps</option>
                             <option value="19200">19200 bps</option>
                             <option value="38400">38400 bps</option>
                             <option value="57600">57600 bps</option>

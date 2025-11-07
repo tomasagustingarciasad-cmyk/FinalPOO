@@ -687,9 +687,9 @@ public:
         PgConfig cfg;
         cfg.host = "localhost";
         cfg.port = 31432;  // Puerto del Docker
-        cfg.dbname = "finalpoo";
+        cfg.dbname = "poo";
         cfg.user = "postgres";
-        cfg.password = "admin123";
+        cfg.password = "pass123";
         cfg.ssl_disable = true;
         
         try {
