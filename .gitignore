@@ -10,3 +10,4 @@ servidor/servidor_rpc
 __pycache__/
 *.log
 *.tmp
+*.csv

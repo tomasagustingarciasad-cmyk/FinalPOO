@@ -25,7 +25,15 @@
                         <div class="alert alert-danger">
                             <i class="bi bi-exclamation-triangle"></i> <%= error %>
                         </div>
-                    <% } else if (status) { %>
+                    <% } %>
+                    
+                    <% if (success) { %>
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle"></i> <%= success %>
+                        </div>
+                    <% } %>
+                    
+                    <% if (status) { %>
                         <div class="row">
                             <div class="col-6">
                                 <strong>Modo:</strong> <%= status.mode || 'N/A' %>
@@ -116,7 +124,7 @@
 
                     <div class="row mb-3">
                         <div class="col-6">
-                            <form method="post" action="/homing" class="d-inline">
+                            <form method="post" action="/robot/homing" class="d-inline">
                                 <button type="submit" class="btn btn-warning w-100">
                                     <i class="bi bi-house"></i> Homing
                                 </button>
@@ -131,7 +139,7 @@
                     
                     <div class="row mb-3">
                         <div class="col-6">
-                            <form method="post" action="/motors" class="d-inline">
+                            <form method="post" action="/robot/motors" class="d-inline">
                                 <input type="hidden" name="on" value="1">
                                 <button type="submit" class="btn btn-success w-100">
                                     <i class="bi bi-power"></i> Motores ON
@@ -139,7 +147,7 @@
                             </form>
                         </div>
                         <div class="col-6">
-                            <form method="post" action="/motors" class="d-inline">
+                            <form method="post" action="/robot/motors" class="d-inline">
                                 <input type="hidden" name="on" value="0">
                                 <button type="submit" class="btn btn-outline-danger w-100">
                                     <i class="bi bi-power"></i> Motores OFF
@@ -150,7 +158,7 @@
 
                     <div class="row">
                         <div class="col-6">
-                            <form method="post" action="/gripper" class="d-inline">
+                            <form method="post" action="/robot/gripper" class="d-inline">
                                 <input type="hidden" name="on" value="1">
                                 <button type="submit" class="btn btn-info w-100">
                                     <i class="bi bi-gear"></i> Gripper ON
@@ -158,7 +166,7 @@
                             </form>
                         </div>
                         <div class="col-6">
-                            <form method="post" action="/gripper" class="d-inline">
+                            <form method="post" action="/robot/gripper" class="d-inline">
                                 <input type="hidden" name="on" value="0">
                                 <button type="submit" class="btn btn-outline-secondary w-100">
                                     <i class="bi bi-gear"></i> Gripper OFF

@@ -44,6 +44,10 @@ public:
     void setEndEffectorState(bool active);
     bool isPositionTrackingEnabled() const { return positionTracking_; }
     void enablePositionTracking(bool enable) { positionTracking_ = enable; }
+    
+    // Getters para estado del robot
+    bool getMotorsOn() const { return motorsOn_; }
+    bool getGripperOn() const; // Se implementa en Robot.cpp
 private:
     bool sendAndWaitOk(const std::string& line, int timeoutMs = 5000);
     std::string readLine(int timeoutMs = 500);

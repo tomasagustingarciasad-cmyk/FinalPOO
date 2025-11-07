@@ -18,15 +18,26 @@ router.get("/panel", requireLogin, async (req, res) => {
     
     let status = null;
     let error = null;
+    let success = null;
     
-    // Obtener estado del robot
-    try {
-      status = await rpc.myStatus(req.session.token);
-      logSystem(req, 'status_check', `Estado del robot obtenido exitosamente`);
-    } catch (e) {
-      error = "Error obteniendo estado: " + (e?.message || String(e));
-      console.error("Error getting status:", e);
-      logError(req, 'status_check', `Error obteniendo estado del robot: ${e?.message || String(e)}`);
+    // Obtener mensajes de éxito/error de los parámetros de query
+    if (req.query.success) {
+      success = req.query.success;
+    }
+    if (req.query.error) {
+      error = req.query.error;
+    }
+    
+    // Obtener estado del robot (solo si no hay error de parámetros)
+    if (!error) {
+      try {
+        status = await rpc.myStatus(req.session.token);
+        logSystem(req, 'status_check', `Estado del robot obtenido exitosamente`);
+      } catch (e) {
+        error = "Error obteniendo estado: " + (e?.message || String(e));
+        console.error("Error getting status:", e);
+        logError(req, 'status_check', `Error obteniendo estado del robot: ${e?.message || String(e)}`);
+      }
     }
     
     console.log("About to render template");
@@ -34,6 +45,7 @@ router.get("/panel", requireLogin, async (req, res) => {
     res.render("panel/index", { 
       status, 
       error, 
+      success,
       user: req.session.user 
     });
     

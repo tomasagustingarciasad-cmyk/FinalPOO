@@ -268,11 +268,14 @@ public:
             
             g_logger.logSystem("ConnectRobotMethod", LogLevel::INFO, "Intento de conexión robot", "Puerto: " + port + " Baud: " + std::to_string(baud));
             
-            if (robot->connect(port, baud)) { 
+            if (robot->connect(port, baud)) {
+                // Habilitar tracking automáticamente al conectar para que los movimientos actualicen la posición
+                robot->enablePositionTracking(true);
+                
                 result["ok"] = true; 
                 result["message"] = "Conectado";
-                g_logger.logSystem("ConnectRobotMethod", LogLevel::INFO, "Robot conectado exitosamente", "");
-                logRequest(user, clientIP, 200, "Robot connected successfully to " + port);
+                g_logger.logSystem("ConnectRobotMethod", LogLevel::INFO, "Robot conectado exitosamente con tracking habilitado", "");
+                logRequest(user, clientIP, 200, "Robot connected successfully to " + port + " with tracking enabled");
             }
             else { 
                 result["ok"] = false; 
@@ -326,7 +329,7 @@ public:
         try {
             if (params.size() < 1) throw InvalidParametersException("enableMotors", "on:bool");
             if (!robot->isConnected()) { result["ok"]=false; result["message"]="No conectado"; return; }
-            bool on = bool(params[0]);
+            bool on = static_cast<bool>(params[0]);
             bool ok = robot->enableMotors(on);
             result["ok"]=ok; result["message"]= ok ? (on?"Motores ON":"Motores OFF") : "Fallo enableMotors";
         } catch (const std::exception& e) { throw MethodExecutionException("enableMotors", e.what()); }
@@ -373,7 +376,20 @@ public:
                 return; 
             }
             
-            double x = double(params[0]), y = double(params[1]), z = double(params[2]), vel = double(params[3]);
+            // Conversión robusta de XmlRpcValue a double (soporta int y double)
+            auto toDouble = [](XmlRpc::XmlRpcValue& val) -> double {
+                if (val.getType() == XmlRpc::XmlRpcValue::TypeInt) {
+                    int intVal = val;  // Conversión implícita de XmlRpcValue a int
+                    return static_cast<double>(intVal);
+                } else {
+                    return val;  // Conversión implícita de XmlRpcValue a double
+                }
+            };
+            
+            double x = toDouble(params[0]);
+            double y = toDouble(params[1]); 
+            double z = toDouble(params[2]);
+            double vel = toDouble(params[3]);
             
             LOG_DEBUG("MoveMethod", "execute", "Ejecutando movimiento", 
                      "X:" + std::to_string(x) + " Y:" + std::to_string(y) + 
@@ -410,7 +426,7 @@ public:
         try {
             if (params.size() < 1) throw InvalidParametersException("endEffector", "on:bool");
             if (!robot->isConnected()) { result["ok"]=false; result["message"]="No conectado"; return; }
-            bool on = bool(params[0]);
+            bool on = static_cast<bool>(params[0]);
             bool ok = robot->endEffector(on);
             result["ok"]=ok; result["message"]= ok ? (on?"Gripper ON":"Gripper OFF") : "Fallo endEffector";
         } catch (const std::exception& e) { throw MethodExecutionException("endEffector", e.what()); }
@@ -587,6 +603,53 @@ public:
     }
 };
 
+/**
+ * @brief Método XML-RPC para obtener el estado completo del robot
+ */
+class GetRobotStatusMethod : public ServiceMethod {
+private:
+    Robot* robot_;
+
+public:
+    GetRobotStatusMethod(XmlRpc::XmlRpcServer* srv, Robot* r)
+        : ServiceMethod("getRobotStatus", "Obtiene estado completo del robot", srv), robot_(r) {}
+
+    void execute(XmlRpc::XmlRpcValue& /*params*/, XmlRpc::XmlRpcValue& result) override {
+        try {
+            bool connected = robot_->isConnected();
+            result["success"] = true;
+            result["connected"] = connected;
+            
+            if (connected) {
+                // Estado de los motores (del Robot interno)
+                result["motorsOn"] = robot_->getMotorsOn();
+                result["gripperOn"] = robot_->getGripperOn();
+                
+                // Intentar obtener posición
+                try {
+                    // Usar el Robot para obtener posición actual si es posible
+                    result["position"]["x"] = 0.0;
+                    result["position"]["y"] = 0.0; 
+                    result["position"]["z"] = 0.0;
+                } catch (...) {
+                    result["position"]["x"] = 0.0;
+                    result["position"]["y"] = 0.0;
+                    result["position"]["z"] = 0.0;
+                }
+            } else {
+                result["motorsOn"] = false;
+                result["gripperOn"] = false;
+                result["position"]["x"] = 0.0;
+                result["position"]["y"] = 0.0;
+                result["position"]["z"] = 0.0;
+            }
+        } catch (const std::exception& e) {
+            result["success"] = false;
+            result["message"] = std::string("Error: ") + e.what();
+        }
+    }
+};
+
 // Helper: registrar aquí los métodos relacionados al Robot
 inline void registerRobotMethods(XmlRpc::XmlRpcServer* srv,
     std::vector<std::unique_ptr<ServiceMethod>>& methods, Robot* robot) {
@@ -603,6 +666,7 @@ inline void registerRobotMethods(XmlRpc::XmlRpcServer* srv,
     methods.push_back(std::make_unique<GetPositionMethod>(srv, robot));
     methods.push_back(std::make_unique<SetPositionTrackingMethod>(srv, robot));
     methods.push_back(std::make_unique<IsConnectedMethod>(srv, robot));
+    methods.push_back(std::make_unique<GetRobotStatusMethod>(srv, robot));
 }
 
 /**
@@ -623,9 +687,9 @@ public:
         PgConfig cfg;
         cfg.host = "localhost";
         cfg.port = 31432;  // Puerto del Docker
-        cfg.dbname = "poo";
+        cfg.dbname = "finalpoo";
         cfg.user = "postgres";
-        cfg.password = "pass123";
+        cfg.password = "admin123";
         cfg.ssl_disable = true;
         
         try {

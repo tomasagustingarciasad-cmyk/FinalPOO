@@ -4,8 +4,6 @@ import { logSystem, logError } from "./logger.js";
 
 dotenv.config();
 
-const MOCK_RPC = process.env.MOCK_RPC === "1" || process.env.MOCK_RPC === "true";
-
 // Cliente XML-RPC real
 const client = xmlrpc.createClient({
   host: process.env.RPC_HOST || "localhost",
@@ -48,67 +46,6 @@ function callMethod(method, params = []) {
       }
     });
   });
-}
-
-// ---- MOCK BACKEND (dev only) ---------------------------------------------
-function makeMock() {
-  // two users: admin and operator
-  const users = {
-    admin: { id: 1, username: "admin", password: "Admin123!", roles: ["ADMIN"] },
-    operador: { id: 2, username: "operador", password: "Operador123!", roles: ["OPERATOR"] }
-  };
-  let lastMove = null;
-  let motorsOn = false;
-  let gripperOn = false;
-  let connected = false;
-
-  const mkToken = (u) => Buffer.from(`${u.username}|${Date.now()}`).toString("base64");
-
-  return {
-    async login(username, password) {
-      const u = users[username];
-      if (!u || u.password !== password) {
-        const err = new Error("Invalid credentials (MOCK)");
-        err.status = 401; throw err;
-      }
-      return { token: mkToken(u), user: { id: u.id, username: u.username }, roles: u.roles };
-    },
-    async myStatus(token) {
-      return {
-        mode: "ABS",
-        motorsOn,
-        gripperOn,
-        connected,
-        position: { x: 0, y: 0, z: 0 },
-        lastMove,
-        info: "This is MOCK status. Your C++ XML-RPC server is not connected."
-      };
-    },
-    async move(token, x, y, z, feed) {
-      lastMove = { x, y, z, feed, at: new Date().toISOString() };
-      return { ok: true, message: `MOCK move to X${x} Y${y} Z${z} F${feed ?? "-"}` };
-    },
-    async moveLinear(token, coords) {
-      lastMove = { ...coords, at: new Date().toISOString() };
-      return { ok: true, message: `MOCK G1 to X${coords.x} Y${coords.y} Z${coords.z} F${coords.feed ?? "-"}` };
-    },
-    async homing(token) {
-      lastMove = { homing: true, at: new Date().toISOString() };
-      return { ok: true, message: "MOCK G28 homing" };
-    },
-    async enableMotors(token, on) {
-      motorsOn = !!on; return { ok: true, motorsOn };
-    },
-    async gripper(token, on) {
-      gripperOn = !!on; return { ok: true, gripperOn };
-    },
-    async connectRobot(token, port, baudrate) {
-      connected = true; return { ok: true, message: `MOCK conectado a ${port} @ ${baudrate}` };
-    },
-    async disconnectRobot(token) {
-      connected = false; return { ok: true, message: "MOCK desconectado" };
-    }
-  };
 }
 
 // ---- REAL XML-RPC BACKEND ------------------------------------------------
@@ -198,31 +135,113 @@ const real = {
     }
   },
 
-  // Estado del robot
+  // Estado del robot - método mejorado usando getRobotStatus
   async myStatus(token) {
     try {
-      const result = await callMethod("ServerTest");
-      // Intentar obtener estado más detallado si está disponible
-      let robotConnected = false;
-      try {
-        const posResult = await callMethod("getPosition");
-        robotConnected = posResult && !posResult.message?.includes("No conectado");
-      } catch (e) {
-        // Si falla getPosition, asumimos que no está conectado
-        robotConnected = false;
+      // Usar el nuevo método getRobotStatus que da el estado real
+      const statusResult = await callMethod("getRobotStatus");
+      
+      if (!statusResult.success) {
+        throw new Error("Error obteniendo estado del servidor");
       }
       
+      const connected = !!statusResult.connected;
+      let position = { x: 0, y: 0, z: 0 };
+      let info = connected ? "Robot conectado" : "Robot no conectado";
+      
+      // El servidor ya nos da los valores reales de motorsOn y gripperOn
+      const motorsOn = !!statusResult.motorsOn;
+      const gripperOn = !!statusResult.gripperOn;
+      
+      // Intentar obtener posición detallada si está conectado
+      if (connected) {
+        try {
+          const posResult = await callMethod("getPosition");
+          if (posResult.success && posResult.position) {
+            position = posResult.position;
+            info += " - Posición actualizada";
+          } else {
+            // Usar la posición básica del getRobotStatus
+            position = statusResult.position || { x: 0, y: 0, z: 0 };
+          }
+        } catch (e) {
+          position = statusResult.position || { x: 0, y: 0, z: 0 };
+          info += " - Posición básica";
+        }
+      }
+
+      return {
+        mode: "ABS",
+        motorsOn,
+        gripperOn,
+        connected,
+        position,
+        lastMove: null,
+        info,
+        timestamp: new Date().toISOString()
+      };
+    } catch (err) {
+      throw new Error("Error obteniendo estado: " + err.message);
+    }
+  },
+
+  // Método para verificar que el servidor está funcionando (llamada explícita)
+  async pingServer() {
+    try {
+      const result = await callMethod("ServerTest");
+      return { ok: true, message: "Servidor disponible", result };
+    } catch (err) {
+      throw new Error("Servidor no disponible: " + err.message);
+    }
+  },
+
+  // Método para verificar si el robot está conectado
+  async isRobotConnected(token) {
+    try {
+      const result = await callMethod("isConnected");
+      return result;
+    } catch (err) {
+      throw new Error("Error verificando conexión del robot: " + err.message);
+    }
+  },
+
+  // Método separado para obtener posición cuando se necesite explícitamente
+  async getRobotPosition(token) {
+    try {
+      const result = await callMethod("getPosition");
+      return result;
+    } catch (err) {
+      throw new Error("Error obteniendo posición: " + err.message);
+    }
+  },
+
+  // Método para obtener estado real del robot (solo cuando se necesite)
+  async getRealRobotStatus(token) {
+    try {
+      // Verificar conexión del robot intentando obtener posición
+      const posResult = await callMethod("getPosition");
+      
+      return {
+        mode: "ABS",
+        motorsOn: true, // Asumimos que están encendidos si el robot responde
+        gripperOn: false,
+        connected: true,
+        position: posResult.position || { x: 0, y: 0, z: 0 },
+        lastMove: null,
+        info: "Estado obtenido del robot conectado",
+        timestamp: new Date().toISOString()
+      };
+    } catch (err) {
       return {
         mode: "ABS",
         motorsOn: false,
         gripperOn: false,
-        connected: robotConnected,
+        connected: false,
         position: { x: 0, y: 0, z: 0 },
         lastMove: null,
-        info: robotConnected ? "Robot conectado" : "Robot no conectado"
+        info: "Robot no conectado o no responde: " + err.message,
+        timestamp: new Date().toISOString()
       };
-    } catch (err) {
-      throw new Error("Error obteniendo estado: " + err.message);
     }
   },
 
@@ -295,4 +314,4 @@ const real = {
 };
 
 // ---- EXPORTAR SERVICIO SEGUN CONFIGURACIÓN --------------------------------
-export const rpc = MOCK_RPC ? makeMock() : real;
+export const rpc = real;

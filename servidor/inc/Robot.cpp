@@ -152,4 +152,9 @@ void Robot::setEndEffectorState(bool active) {
     currentPosition_.endEffectorActive = active;
 }
 
+bool Robot::getGripperOn() const {
+    std::lock_guard<std::mutex> lk(positionMutex_);
+    return currentPosition_.endEffectorActive;
+}
+
 } // namespace RPCServer

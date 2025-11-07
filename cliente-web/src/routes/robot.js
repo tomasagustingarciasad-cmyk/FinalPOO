@@ -48,34 +48,60 @@ router.post("/homing", requireLogin, async (req, res) => {
         logSystem(req, 'robot_homing_success', `Homing exitoso por usuario: ${username}`, 
                   `Resultado: ${JSON.stringify(result)}`);
         
-        res.redirect("/panel");
+        if (result.ok) {
+            res.redirect("/panel?success=" + encodeURIComponent("Homing ejecutado correctamente"));
+        } else {
+            res.redirect("/panel?error=" + encodeURIComponent("Error en homing: " + (result.message || "Fallo desconocido")));
+        }
     } catch (e) {
         logError(req, 'robot_homing', `Error en homing por ${username}: ${e?.message || String(e)}`);
         
-        res.status(400).render("panel/index", { status: null, error: e?.message || String(e) });
+        res.redirect("/panel?error=" + encodeURIComponent("Error en homing: " + (e?.message || String(e))));
     }
 });
 
 
 router.post("/motors", requireLogin, async (req, res) => {
-try {
-const on = req.body.on === "1";
-await rpc.enableMotors(req.session.token, on);
-res.redirect("/panel");
-} catch (e) {
-res.status(400).render("panel/index", { status: null, error: e?.message || String(e) });
-}
+    try {
+        const on = req.body.on === "1";
+        const username = req.session?.user?.username || 'unknown';
+        
+        logSystem(req, 'robot_motors', `Comando motores ${on ? 'ON' : 'OFF'} por usuario: ${username}`);
+        
+        const result = await rpc.enableMotors(req.session.token, on);
+        
+        if (result.ok) {
+            res.redirect("/panel?success=" + encodeURIComponent(`Motores ${on ? 'activados' : 'desactivados'} correctamente`));
+        } else {
+            res.redirect("/panel?error=" + encodeURIComponent("Error controlando motores: " + (result.message || "Fallo desconocido")));
+        }
+    } catch (e) {
+        logError(req, 'robot_motors', `Error controlando motores: ${e?.message || String(e)}`);
+        res.redirect("/panel?error=" + encodeURIComponent("Error controlando motores: " + (e?.message || String(e))));
+    }
 });
 
 
-router.post("/gripper", requireLogin, async (req, res) => {
-try {
-const on = req.body.on === "1";
-await rpc.gripper(req.session.token, on);
-res.redirect("/panel");
-} catch (e) {
-res.status(400).render("panel/index", { status: null, error: e?.message || String(e) });
-}
+// Control del gripper
+router.post('/gripper', requireLogin, async (req, res) => {
+    try {
+        const on = req.body.on === "1";
+        const username = req.session?.user?.username || 'unknown';
+        
+        logSystem(req, 'robot_gripper', `Comando gripper ${on ? 'ON' : 'OFF'} por usuario: ${username}`);
+        
+        const result = await rpc.controlGripper(req.session.token, on);
+        
+        if (result.ok) {
+            res.redirect("/panel?success=" + encodeURIComponent(`Gripper ${on ? 'activado' : 'desactivado'} correctamente`));
+        } else {
+            res.redirect("/panel?error=" + encodeURIComponent("Error controlando gripper: " + (result.message || "Fallo desconocido")));
+        }
+    } catch (error) {
+        console.error('Gripper error:', error);
+        logError(req, 'robot_gripper', `Error controlando gripper: ${error.message}`);
+        res.redirect("/panel?error=" + encodeURIComponent("Error controlando gripper: " + error.message));
+    }
 });
 
 router.post("/connect", requireLogin, async (req, res) => {
