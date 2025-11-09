@@ -395,13 +395,34 @@ class LearningMode {
         }
         
         try {
+            // Serialize movements into primitives (numbers, booleans, ISO timestamps, strings)
+            const toISO = (ts) => {
+                if (!ts) return new Date().toISOString();
+                if (ts instanceof Date) return ts.toISOString();
+                try {
+                    const d = new Date(ts);
+                    if (!isNaN(d.getTime())) return d.toISOString();
+                } catch (e) {}
+                return String(ts);
+            };
+
+            const payloadMovements = this.movements.map(m => ({
+                x: Number(m.x || 0),
+                y: Number(m.y || 0),
+                z: Number(m.z || 0),
+                feedrate: Number(m.feedrate || 0),
+                endEffectorActive: !!m.endEffectorActive,
+                notes: m.notes ? String(m.notes) : '',
+                timestamp: toISO(m.timestamp)
+            }));
+
             const response = await fetch('/learning/api/save-learned-routine', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     routineName,
                     description,
-                    movements: this.movements
+                    movements: payloadMovements
                 })
             });
             

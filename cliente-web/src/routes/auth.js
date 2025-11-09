@@ -58,7 +58,7 @@ try {
         } else {
             logAuth(req, 'logout_success', true, `Logout exitoso para usuario: ${username}`);
         }
-        res.redirect("/auth/login");
+        res.redirect("/login");
     });
 } catch (err) {
     console.error("Logout error:", err?.message || err);
@@ -66,7 +66,7 @@ try {
     logError(req, 'logout', `Error en logout: ${err?.message || err}`);
     
     req.session.destroy(() => {
-        res.redirect("/auth/login");
+        res.redirect("/login");
     });
 }
 });

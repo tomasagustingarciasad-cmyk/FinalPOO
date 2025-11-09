@@ -609,6 +609,7 @@ public:
 class GetRobotStatusMethod : public ServiceMethod {
 private:
     Robot* robot_;
+    Position posActual;
 
 public:
     GetRobotStatusMethod(XmlRpc::XmlRpcServer* srv, Robot* r)
@@ -628,9 +629,10 @@ public:
                 // Intentar obtener posición
                 try {
                     // Usar el Robot para obtener posición actual si es posible
-                    result["position"]["x"] = 0.0;
-                    result["position"]["y"] = 0.0; 
-                    result["position"]["z"] = 0.0;
+                    posActual = robot_->getCurrentPosition();
+                    result["position"]["x"] = posActual.x;
+                    result["position"]["y"] = posActual.y; 
+                    result["position"]["z"] = posActual.z;
                 } catch (...) {
                     result["position"]["x"] = 0.0;
                     result["position"]["y"] = 0.0;
@@ -2125,6 +2127,8 @@ public:
         std::string routineName = static_cast<std::string>(params[1]);
         std::string description = static_cast<std::string>(params[2]);
         XmlRpc::XmlRpcValue movements = params[3];
+
+        std::cout<<movements<<std::endl;
         
         try {
             // Verificar token
@@ -2154,7 +2158,6 @@ public:
             // Procesar cada movimiento
             for (int i = 0; i < movements.size(); ++i) {
                 auto move = movements[i];
-                
                 if (move.hasMember("x") && move.hasMember("y") && move.hasMember("z")) {
                     double x = double(move["x"]);
                     double y = double(move["y"]);

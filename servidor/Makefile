@@ -30,6 +30,24 @@ TARGET = servidor_rpc
 # All targets
 all: $(TARGET)
 
+# Test sources and target
+TEST_SOURCES = tests/test_server_methods.cpp
+TEST_TARGET = tests/test_server_methods
+
+# Build and/or run C++ unit test binary
+test-cpp: $(TEST_TARGET)
+	@echo "Built C++ test binary: $(TEST_TARGET)"
+
+$(TEST_TARGET): $(TEST_SOURCES)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -I"../unit tests/cpp" $^ -o $@
+
+# Integration test (Python) - default test target runs integration tests
+test: integration-test
+
+integration-test:
+	@echo "Running integration tests (Python)..."
+	@python3 tests/integration_test.py
+
 # Server target
 $(TARGET): $(XMLRPC_OBJECTS) main_servidor.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
