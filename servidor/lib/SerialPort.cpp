@@ -80,6 +80,28 @@ void SerialPort::setDtrRts(bool dtr, bool rts) {
     ioctl(fd_, TIOCMSET, &status);
 }
 
+void SerialPort::flushBuffers(bool flushInput, bool flushOutput) {
+    if (fd_ < 0) return;
+    int how = 0;
+    if (flushInput && flushOutput) how = TCIOFLUSH;
+    else if (flushInput) how = TCIFLUSH;
+    else if (flushOutput) how = TCOFLUSH;
+    else return;
+
+    // Drop kernel buffers
+    tcflush(fd_, how);
+
+    // Also attempt to clear driver's input queue using ioctl if available
+    int count = 0;
+    if (flushInput) {
+        if (ioctl(fd_, FIONREAD, &count) == 0 && count > 0) {
+            // read and discard
+            std::string tmp(count, 0);
+            ::read(fd_, &tmp[0], count);
+        }
+    }
+}
+
 
 bool SerialPort::writeLine(const std::string& line) {
     if (!opened_) return false;

@@ -17,6 +17,9 @@ bool Robot::connect(const std::string& port, int baud){
         return false;
     }
 
+    // Clear any junk coming from the device immediately after opening.
+    // This drops kernel buffers and tries to read any pending bytes.
+    serial_.flushBuffers(true, true);
     LOG_DEBUG("Robot", "Puerto serie abierto exitosamente", "Esperando banner/sincronización");
 
     // Intentar sincronizar: algunos firmwares envían "start" o banner
@@ -85,14 +88,14 @@ bool Robot::sendAndWaitOk(const std::string& line, int timeoutMs){
 bool Robot::setMode(bool /*manual*/, bool absolute){
     if (absolute_ != absolute){
         absolute_ = absolute;
-        return sendAndWaitOk(absolute_ ? "G90" : "G91", 3000);
+        return sendAndWaitOk(absolute_ ? "G90" : "G91", 15000);
     }
     return true;
 }
 
 bool Robot::enableMotors(bool on){
     motorsOn_ = on;
-    return sendAndWaitOk(on ? "M17" : "M18", 3000);
+    return sendAndWaitOk(on ? "M17" : "M18", 15000);
 }
 
 bool Robot::home(){
@@ -106,20 +109,15 @@ bool Robot::move(double x, double y, double z, double vel){
     
     bool success = sendAndWaitOk(ss.str(), 15000);
     
-    // Actualizar posición si el tracking está habilitado y el movimiento fue exitoso
-    if (success) {
-        getCurrentPosition();
-    }
-    
     return success;
 }
 
 bool Robot::endEffector(bool on){
     // Ajusta a tu efector real si no es ventilador
-    bool success = sendAndWaitOk(on ? "M3" : "M5", 5000);
+    bool success = sendAndWaitOk(on ? "M3" : "M5", 15000);
     
     // Actualizar estado del efector si el tracking está habilitado
-    if (success && positionTracking_) {
+    if (success) {
         setEndEffectorState(on);
     }
     
