@@ -16,22 +16,52 @@ router.get("/move", requireLogin, (req, res) => {
 
 router.post("/move", requireLogin, async (req, res) => {
     const { x, y, z, feed } = req.body;
+    const redirectToPanel = req.query.redirect === 'panel';
     const username = req.session?.user?.username || 'unknown';
     
     try {
+        const feedValueProvided = typeof feed !== 'undefined' && feed !== '';
+        const feedNum = feedValueProvided ? Number(feed) : 100;
+
         logSystem(req, 'robot_move_attempt', `Intento de movimiento por ${username}`, 
-                  `Coordenadas: x=${x}, y=${y}, z=${z}, feed=${feed || 100}`);
+                  `Coordenadas: x=${x}, y=${y}, z=${z}, feed=${feedValueProvided ? feed : 100}`);
         
-        const result = await rpc.move(req.session.token, Number(x), Number(y), Number(z), feed ? Number(feed) : 100);
+        const result = await rpc.move(req.session.token, Number(x), Number(y), Number(z), feedNum);
         
         logSystem(req, 'robot_move_success', `Movimiento exitoso por ${username}`, 
                   `Resultado: ${JSON.stringify(result)}`);
+
+        if (redirectToPanel) {
+            const params = new URLSearchParams({
+                success: `Movimiento enviado correctamente (X=${x}, Y=${y}, Z=${z})`,
+                mx: String(x ?? ''),
+                my: String(y ?? ''),
+                mz: String(z ?? '')
+            });
+            if (feedValueProvided) {
+                params.set('mf', String(feed));
+            }
+            return res.redirect(`/panel?${params.toString()}`);
+        }
         
         res.render("robot/move", { result, error: null, last: { x, y, z, feed } });
     } catch (e) {
         logError(req, 'robot_move', `Error en movimiento por ${username}: ${e?.message || String(e)}`, 
                  `Coordenadas solicitadas: x=${x}, y=${y}, z=${z}, feed=${feed || 100}`);
-        
+
+        if (redirectToPanel) {
+            const params = new URLSearchParams({
+                error: e?.message || String(e),
+                mx: String(x ?? ''),
+                my: String(y ?? ''),
+                mz: String(z ?? '')
+            });
+            if (typeof feed !== 'undefined') {
+                params.set('mf', String(feed));
+            }
+            return res.redirect(`/panel?${params.toString()}`);
+        }
+
         res.status(400).render("robot/move", { result: null, error: e?.message || String(e), last: { x, y, z, feed } });
     }
 });

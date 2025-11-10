@@ -41,12 +41,20 @@ router.get("/panel", requireLogin, async (req, res) => {
     }
     
     console.log("About to render template");
+
+    const moveForm = {
+      x: typeof req.query.mx !== 'undefined' ? req.query.mx : '',
+      y: typeof req.query.my !== 'undefined' ? req.query.my : '',
+      z: typeof req.query.mz !== 'undefined' ? req.query.mz : '',
+      feed: typeof req.query.mf !== 'undefined' ? req.query.mf : ''
+    };
     
     res.render("panel/index", { 
       status, 
       error, 
       success,
-      user: req.session.user 
+      user: req.session.user,
+      moveForm
     });
     
     console.log("Template rendered successfully");

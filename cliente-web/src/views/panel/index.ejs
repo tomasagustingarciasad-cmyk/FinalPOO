@@ -124,17 +124,12 @@
                     </div>
 
                     <div class="row mb-3">
-                        <div class="col-6">
+                        <div class="col-12">
                             <form method="post" action="/robot/homing" class="d-inline">
                                 <button type="submit" class="btn btn-warning w-100">
                                     <i class="bi bi-house"></i> Homing
                                 </button>
                             </form>
-                        </div>
-                        <div class="col-6">
-                            <a href="/robot/move" class="btn btn-primary w-100">
-                                <i class="bi bi-arrows-move"></i> Mover Robot
-                            </a>
                         </div>
                     </div>
                     
@@ -167,6 +162,40 @@
                             <% } %>
                         </div>
                     </div>
+
+                    <hr>
+                    <% const moveDefaults = (typeof moveForm !== 'undefined' && moveForm) ? moveForm : { x: '', y: '', z: '', feed: '' }; %>
+                    <h6 class="text-uppercase text-muted">Movimiento cartesiano (G1)</h6>
+                    <form method="post" action="/robot/move?redirect=panel">
+                        <div class="row g-2">
+                            <div class="col-6 col-lg-3">
+                                <label class="form-label">X (mm)</label>
+                                <input type="number" step="any" name="x" class="form-control" value="<%= moveDefaults.x %>" required>
+                            </div>
+                            <div class="col-6 col-lg-3">
+                                <label class="form-label">Y (mm)</label>
+                                <input type="number" step="any" name="y" class="form-control" value="<%= moveDefaults.y %>" required>
+                            </div>
+                            <div class="col-6 col-lg-3">
+                                <label class="form-label">Z (mm)</label>
+                                <input type="number" step="any" name="z" class="form-control" value="<%= moveDefaults.z %>" required>
+                            </div>
+                            <div class="col-6 col-lg-3">
+                                <label class="form-label">Feed (F)</label>
+                                <input type="number" step="any" name="feed" class="form-control" value="<%= moveDefaults.feed %>">
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-12 d-flex justify-content-end gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-arrow-up-right"></i> Enviar movimiento
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-text mt-2">
+                            Si la velocidad (Feed) se deja vacía se utilizará el valor por defecto configurado en el servidor.
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
