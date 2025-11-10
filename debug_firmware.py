@@ -120,16 +120,7 @@ def debug_firmware_communication():
             print("⚠️  El firmware responde pero la línea CURRENT POSITION está vacía")
             print("   Líneas del primer M114:")
             for line in lines_received:
-                print(f"   - '{line}'")
-                
-        print("\nPARA OBTENER LA POSICIÓN:")
-        print("1. Envía: M114\\r")
-        print("2. Espera respuesta con formato:")
-        print("   INFO: ABSOLUTE MODE")
-        print("   INFO: CURRENT POSITION: [X:### Y:### Z:### E:###]") 
-        print("   INFO: MOTORS ENABLED/DISABLED")
-        print("   INFO: FAN ENABLED/DISABLED")
-        print("   OK")
+                print(f"   - '{line}'")            
         
     except Exception as e:
         print(f"ERROR: {e}")
