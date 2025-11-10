@@ -15,6 +15,8 @@ public:
     bool isOpen() const;
     bool writeLine(const std::string& line);
     std::string readLine(int timeoutMs = 500);
+    // Flush input/output buffers. By default flushes both directions.
+    void flushBuffers(bool flushInput = true, bool flushOutput = true);
 
 private:
     bool configure(int baud);
