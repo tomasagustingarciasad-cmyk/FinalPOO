@@ -453,12 +453,17 @@ public:
             
             std::string gcode = std::string(params[0]);
             
+            LOG_DEBUG("ExecuteGcodeMethod", "execute", "Iniciando ejecución de G-code", 
+                     "Longitud: " + std::to_string(gcode.length()) + " bytes");
+            
             // Parsear y ejecutar línea por línea
             std::istringstream stream(gcode);
             std::string line;
             int lineCount = 0;
             int successCount = 0;
+            int skippedCount = 0;
             std::vector<std::string> errors;
+            std::vector<std::string> warnings;
             
             while (std::getline(stream, line)) {
                 lineCount++;
@@ -469,40 +474,84 @@ public:
                     line = line.substr(0, commentPos);
                 }
                 
-                // Quitar espacios al inicio y final
+                // Quitar espacios al inicio y final, incluyendo \r
                 line.erase(0, line.find_first_not_of(" \t\r\n"));
                 line.erase(line.find_last_not_of(" \t\r\n") + 1);
                 
                 // Saltar líneas vacías
                 if (line.empty()) {
+                    skippedCount++;
                     continue;
                 }
                 
+                LOG_DEBUG("ExecuteGcodeMethod", "execute", 
+                         "Ejecutando línea " + std::to_string(lineCount), 
+                         "Comando: " + line);
+                
                 // Enviar comando al robot
-                if (robot->sendGcodeCommand(line)) {
+                // El timeout está manejado dentro de sendGcodeCommand según el tipo de comando
+                bool cmdSuccess = robot->sendGcodeCommand(line);
+                
+                if (cmdSuccess) {
                     successCount++;
+                    LOG_DEBUG("ExecuteGcodeMethod", "execute", 
+                             "Línea ejecutada exitosamente", 
+                             "Línea " + std::to_string(lineCount) + ": " + line);
                 } else {
-                    errors.push_back("Línea " + std::to_string(lineCount) + ": " + line);
+                    // No fallar inmediatamente - registrar advertencia
+                    std::string warnMsg = "Línea " + std::to_string(lineCount) + ": " + line;
+                    warnings.push_back(warnMsg);
+                    LOG_WARNING("ExecuteGcodeMethod", 
+                               "Advertencia en línea " + std::to_string(lineCount) + ": " + line);
+                    
+                    // Solo agregar a errores críticos si es un comando importante
+                    if (line.rfind("G28", 0) == 0 || line.rfind("M17", 0) == 0) {
+                        errors.push_back("ERROR CRÍTICO - " + warnMsg);
+                    }
                 }
             }
             
+            // Reportar resultado basado en comandos críticos
             if (errors.empty()) {
                 result["success"] = true;
                 result["message"] = "G-code ejecutado exitosamente";
                 result["linesProcessed"] = successCount;
+                result["linesTotal"] = lineCount;
+                result["linesSkipped"] = skippedCount;
+                
+                if (!warnings.empty()) {
+                    result["warnings"].setSize(warnings.size());
+                    for (size_t i = 0; i < warnings.size(); ++i) {
+                        result["warnings"][i] = warnings[i];
+                    }
+                    LOG_INFO("ExecuteGcodeMethod", 
+                            "G-code ejecutado con " + std::to_string(warnings.size()) + " advertencias");
+                }
+                
+                LOG_SYSTEM("ExecuteGcodeMethod", LogLevel::INFO, 
+                          "G-code ejecutado exitosamente",
+                          "Procesadas: " + std::to_string(successCount) + "/" + 
+                          std::to_string(lineCount - skippedCount));
             } else {
                 result["success"] = false;
-                result["message"] = "Algunos comandos fallaron";
+                result["message"] = "Algunos comandos críticos fallaron";
                 result["linesProcessed"] = successCount;
+                result["linesTotal"] = lineCount;
+                result["linesSkipped"] = skippedCount;
                 
                 // Convertir vector de errores a XmlRpcValue array
                 result["errors"].setSize(errors.size());
                 for (size_t i = 0; i < errors.size(); ++i) {
                     result["errors"][i] = errors[i];
                 }
+                
+                LOG_ERROR("ExecuteGcodeMethod", "GCODE_EXECUTION_ERROR",
+                         "Errores críticos durante ejecución de G-code",
+                         std::to_string(errors.size()) + " errores críticos");
             }
             
         } catch (const std::exception& e) {
+            LOG_ERROR("ExecuteGcodeMethod", "EXCEPTION", "Excepción durante executeGcode", e.what());
             throw MethodExecutionException("executeGcode", e.what());
         }
     }
@@ -689,9 +738,9 @@ public:
         PgConfig cfg;
         cfg.host = "localhost";
         cfg.port = 31432;  // Puerto del Docker
-        cfg.dbname = "poo";
+        cfg.dbname = "finalpoo";
         cfg.user = "postgres";
-        cfg.password = "pass123";
+        cfg.password = "admin123";
         cfg.ssl_disable = true;
         
         try {

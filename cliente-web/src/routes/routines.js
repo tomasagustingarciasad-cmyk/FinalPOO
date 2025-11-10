@@ -88,6 +88,9 @@ router.post("/routines", requireLogin, upload.single('gcodeFile'), async (req, r
       return res.redirect('/routines/new?error=' + encodeURIComponent('Se requiere un archivo o contenido G-code'));
     }
     
+    // Normalizar saltos de línea: eliminar \r (retorno de carro)
+    finalContent = finalContent.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    
     console.log("Creando rutina:", {
       filename: finalFilename,
       description,
@@ -188,6 +191,9 @@ router.post("/routines/:id", requireLogin, upload.single('gcodeFile'), async (re
     if (!finalContent || !filename) {
       return res.redirect(`/routines/${routineId}/edit?error=` + encodeURIComponent('Se requiere nombre y contenido'));
     }
+    
+    // Normalizar saltos de línea: eliminar \r (retorno de carro)
+    finalContent = finalContent.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
     
     console.log("Actualizando rutina:", routineId, {
       filename,
