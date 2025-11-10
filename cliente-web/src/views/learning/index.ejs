@@ -1,20 +1,4 @@
 <div class="container mt-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2><i class="fas fa-graduation-cap"></i> Modo de Aprendizaje</h2>
-                <div>
-                    <button id="trackingBtn" class="btn btn-outline-primary me-2">
-                        <i class="fas fa-crosshairs"></i> Habilitar Tracking
-                    </button>
-                    <a href="/robot/move" class="btn btn-outline-secondary">
-                        <i class="fas fa-gamepad"></i> Control Manual
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Estado del Sistema -->
     <div class="row mb-4">
         <div class="col-md-6">
@@ -24,10 +8,6 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-6">
-                            <small class="text-muted">Tracking:</small>
-                            <div id="trackingStatus" class="fw-bold text-danger">Deshabilitado</div>
-                        </div>
                         <div class="col-6">
                             <small class="text-muted">Movimientos:</small>
                             <div id="movementCount" class="fw-bold text-primary">0</div>
@@ -217,7 +197,6 @@
 <script>
 class LearningMode {
     constructor() {
-        this.trackingEnabled = false;
         this.movements = [];
         this.endEffectorState = false;
         this.currentPosition = { x: 0, y: 0, z: 0, feedrate: 1000 };
@@ -225,20 +204,12 @@ class LearningMode {
         this.initializeEventListeners();
         this.updatePosition();
         
-        // Actualizar posición cada 2 segundos si el tracking está habilitado
         setInterval(() => {
-            if (this.trackingEnabled) {
-                this.updatePosition();
-            }
-        }, 2000);
+            this.updatePosition();
+        }, 20000);
     }
     
     initializeEventListeners() {
-        // Tracking toggle
-        document.getElementById('trackingBtn').addEventListener('click', () => {
-            this.toggleTracking();
-        });
-        
         // Movimiento rápido
         document.getElementById('quickMoveBtn').addEventListener('click', () => {
             this.quickMove();
@@ -268,26 +239,6 @@ class LearningMode {
         this.updateSaveButton();
     }
     
-    async toggleTracking() {
-        try {
-            const response = await fetch('/learning/api/tracking', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ enable: !this.trackingEnabled })
-            });
-            
-            const result = await response.json();
-            if (result.success) {
-                this.trackingEnabled = result.trackingEnabled;
-                this.updateTrackingUI();
-                this.showAlert('success', result.message);
-            } else {
-                this.showAlert('danger', result.message);
-            }
-        } catch (error) {
-            this.showAlert('danger', 'Error al cambiar tracking: ' + error.message);
-        }
-    }
     
     async quickMove() {
         const x = parseFloat(document.getElementById('quickX').value);
@@ -305,7 +256,6 @@ class LearningMode {
             const result = await response.json();
             if (result.success || result.ok) {
                 this.showAlert('success', 'Movimiento completado');
-                // Si el tracking está habilitado, el movimiento se registrará automáticamente
                 setTimeout(() => this.updatePosition(), 500);
             } else {
                 this.showAlert('danger', result.message);
@@ -447,23 +397,6 @@ class LearningMode {
             }
         } catch (error) {
             this.showAlert('danger', 'Error al guardar rutina: ' + error.message);
-        }
-    }
-    
-    updateTrackingUI() {
-        const btn = document.getElementById('trackingBtn');
-        const status = document.getElementById('trackingStatus');
-        
-        if (this.trackingEnabled) {
-            btn.innerHTML = '<i class="fas fa-crosshairs"></i> Deshabilitar Tracking';
-            btn.className = 'btn btn-success me-2';
-            status.className = 'fw-bold text-success';
-            status.textContent = 'Habilitado';
-        } else {
-            btn.innerHTML = '<i class="fas fa-crosshairs"></i> Habilitar Tracking';
-            btn.className = 'btn btn-outline-primary me-2';
-            status.className = 'fw-bold text-danger';
-            status.textContent = 'Deshabilitado';
         }
     }
     

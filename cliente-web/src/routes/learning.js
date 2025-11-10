@@ -45,21 +45,6 @@ router.get("/api/position", requireLogin, async (req, res) => {
     }
 });
 
-// API para habilitar/deshabilitar tracking
-router.post("/api/tracking", requireLogin, async (req, res) => {
-    try {
-        const { enable } = req.body;
-        const result = await callRPC("setPositionTracking", [enable]);
-        res.json(result);
-    } catch (error) {
-        console.error("Error setting tracking:", error);
-        res.status(500).json({ 
-            success: false, 
-            message: "Error al configurar tracking: " + error.message 
-        });
-    }
-});
-
 // API para mover el robot (esto se trackeará automáticamente)
 router.post("/api/move", requireLogin, async (req, res) => {
     try {

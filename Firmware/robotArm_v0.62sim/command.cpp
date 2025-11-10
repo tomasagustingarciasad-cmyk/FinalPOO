@@ -94,7 +94,10 @@ void Command::cmdGetPosition(Point pos, Point pos_offset, float highRad, float l
   } else {
     Logger::logINFO("ABSOLUTE MODE");
   }
-  Logger::logINFO("CURRENT POSITION: [X:"+String(pos.xmm - pos_offset.xmm)+" Y:"+String(pos.ymm - pos_offset.ymm)+" Z:"+String(pos.zmm - pos_offset.zmm)+" E:"+String(pos.emm - pos_offset.emm)+"]");
+  Logger::logINFO("X:"+String(pos.xmm - pos_offset.xmm));
+  Logger::logINFO("Y:"+String(pos.ymm - pos_offset.ymm));
+  Logger::logINFO("Z:"+String(pos.zmm - pos_offset.zmm));
+  Logger::logINFO("E:"+String(pos.emm - pos_offset.emm));
   //Logger::logINFO("RADIANS: [HIGH:"+String(highRad)+" LOW:"+String(lowRad)+" ROT:"+String(rotRad));
   
   if(onMotors) {
