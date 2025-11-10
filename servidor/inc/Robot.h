@@ -42,8 +42,8 @@ public:
     Position getCurrentPosition() const;
     // Query the robot for current position via M114 and update internal tracking.
     // This is non-const because it performs I/O and mutates `currentPosition_`.
-    // Default timeout increased to 5000ms to allow slower devices to respond.
-    bool queryCurrentPosition(int timeoutMs = 5000);
+    // Default timeout increased to 10000ms to allow slower devices to respond.
+    bool queryCurrentPosition(int timeoutMs = 10000);
     bool updateCurrentPosition(double x, double y, double z, double feedrate = 1000.0);
     void setEndEffectorState(bool active);
     bool isPositionTrackingEnabled() const { return positionTracking_; }

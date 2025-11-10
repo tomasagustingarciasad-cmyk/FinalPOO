@@ -32,6 +32,7 @@ bool Robot::connect(const std::string& port, int baud){
     }
     
     LOG_SYSTEM("Robot", "Robot conectado exitosamente en puerto: " + port);
+
     // No exigimos texto específico; con la espera tras open suele bastar
     return true;
 }
@@ -106,8 +107,8 @@ bool Robot::move(double x, double y, double z, double vel){
     bool success = sendAndWaitOk(ss.str(), 15000);
     
     // Actualizar posición si el tracking está habilitado y el movimiento fue exitoso
-    if (success && positionTracking_) {
-        updateCurrentPosition(x, y, z, vel);
+    if (success) {
+        getCurrentPosition();
     }
     
     return success;
@@ -115,7 +116,7 @@ bool Robot::move(double x, double y, double z, double vel){
 
 bool Robot::endEffector(bool on){
     // Ajusta a tu efector real si no es ventilador
-    bool success = sendAndWaitOk(on ? "M106" : "M107", 5000);
+    bool success = sendAndWaitOk(on ? "M3" : "M5", 5000);
     
     // Actualizar estado del efector si el tracking está habilitado
     if (success && positionTracking_) {
@@ -137,7 +138,7 @@ Position Robot::getCurrentPosition() const {
     Robot* self = const_cast<Robot*>(this);
     // Best-effort: if querying fails or times out, return last known position.
     // Use default (increased) timeout to allow slow devices to respond.
-    self->queryCurrentPosition();
+    self->queryCurrentPosition(15000);
 
     std::lock_guard<std::mutex> lk(positionMutex_);
     return currentPosition_;
@@ -157,6 +158,17 @@ bool Robot::queryCurrentPosition(int timeoutMs){
     std::string positionLine;
     const int perReadMs = 1000; // aumentar espera por lectura para dispositivos lentos
     std::string recvBuf; // acumulador para fragmentos parciales
+
+    double tx = 0.0, ty = 0.0, tz = 0.0, te = 0.0;
+    bool gotX = false, gotY = false, gotZ = false, gotE = false;
+
+    auto trim = [](const std::string &s) {
+        size_t b = s.find_first_not_of(" \t\r\n");
+        if (b == std::string::npos) return std::string();
+        size_t e = s.find_last_not_of(" \t\r\n");
+        return s.substr(b, e - b + 1);
+    };
+
     while (elapsed <= timeoutMs){
         auto line = serial_.readLine(perReadMs);
         elapsed += perReadMs;
@@ -173,81 +185,103 @@ bool Robot::queryCurrentPosition(int timeoutMs){
             LOG_ERROR("Robot", "Respuesta de error al consultar posicion: '" + line + "'");
             return false;
         }
+        // Si recibimos un 'ok' podemos salir: el dispositivo terminó su reporte
+        if (fragUpper.find("OK") != std::string::npos) {
+            LOG_DEBUG("Robot", "Se recibió OK durante consulta de posición, saliendo del bucle");
+            break;
+        }
 
-        // Acumular fragmento y buscar la línea completa o el bloque con corchetes
-        if (!recvBuf.empty()) recvBuf.push_back(' ');
+        // Acumular fragmento
+        if (!recvBuf.empty()) recvBuf.push_back('\n');
         recvBuf.append(line);
 
-        // Buscamos la etiqueta y el corchete de cierre dentro del buffer acumulado
+        // Intentar detectar bloque con corchetes (formato antiguo)
         auto infoPos = recvBuf.find("INFO:CURRENT POSITION");
         if (infoPos == std::string::npos) infoPos = recvBuf.find("CURRENT POSITION");
         if (infoPos != std::string::npos){
             auto lbr = recvBuf.find('[', infoPos);
             auto rbr = recvBuf.find(']', infoPos);
             if (lbr != std::string::npos && rbr != std::string::npos && rbr > lbr){
-                // Extraer la porción completa que contiene la información
                 positionLine = recvBuf.substr(infoPos, rbr - infoPos + 1);
                 break;
             }
-            // si aún no encontramos ']', esperamos más fragmentos
         }
-        // Si buffer crece mucho sin encontrar info, recortarlo para evitar uso excesivo
-        if (recvBuf.size() > 4096) recvBuf.erase(0, recvBuf.size() - 1024);
+
+        // Parsear líneas individuales: admitir "INFO: X: 100.00" o "X:100.00"
+        {
+            std::string t = trim(line);
+            if (!t.empty()){
+                // Quitar prefijo INFO: si existe
+                std::string upper = t;
+                std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+                if (upper.rfind("INFO:", 0) == 0) {
+                    t = trim(t.substr(5));
+                }
+
+                // Buscar token KEY:VALUE
+                auto colon = t.find(':');
+                if (colon != std::string::npos && colon > 0){
+                    std::string key = t.substr(0, colon);
+                    std::string val = trim(t.substr(colon + 1));
+                    try {
+                        double v = std::stod(val);
+                        if (key == "X" || key == "x") { tx = v; gotX = true; }
+                        else if (key == "Y" || key == "y") { ty = v; gotY = true; }
+                        else if (key == "Z" || key == "z") { tz = v; gotZ = true; }
+                        else if (key == "E" || key == "e") { te = v; gotE = true; }
+                    } catch (...) {
+                        // ignore parse errors
+                    }
+                }
+            }
+        }
+
+        if (recvBuf.size() > 8192) recvBuf.erase(0, recvBuf.size() - 4096);
     }
 
-    if (positionLine.empty()){
-        LOG_DEBUG("Robot", "No se recibió línea de posición dentro del timeout");
-        return false;
-    }
+    // Si recibimos bloque con corchetes, parsearlo
+    if (!positionLine.empty()){
+        auto lpos = positionLine.find('[');
+        auto rpos = positionLine.find(']');
+        if (lpos == std::string::npos || rpos == std::string::npos || rpos <= lpos){
+            LOG_ERROR("Robot", "Formato inesperado de linea de posicion: '" + positionLine + "'");
+            return false;
+        }
 
-    // Ejemplo esperado: INFO:CURRENT POSITION: [X:0.00 Y:170.00, Z:120.00, E:0.00]
-    // Extraer dentro de los corchetes
-    auto lpos = positionLine.find('[');
-    auto rpos = positionLine.find(']');
-    if (lpos == std::string::npos || rpos == std::string::npos || rpos <= lpos){
-        LOG_ERROR("Robot", "Formato inesperado de linea de posicion: '" + positionLine + "'");
-        return false;
-    }
+        std::string inside = positionLine.substr(lpos + 1, rpos - lpos - 1);
+        for (auto &c: inside) if (c == ',') c = ' ';
 
-    std::string inside = positionLine.substr(lpos + 1, rpos - lpos - 1);
-
-    // Reemplazar comas por espacios para simplificar el parseo
-    for (auto &c: inside) if (c == ',') c = ' ';
-
-    double x = 0.0, y = 0.0, z = 0.0;
-    bool gotX = false, gotY = false, gotZ = false;
-
-    std::istringstream iss(inside);
-    std::string token;
-    while (iss >> token){
-        // token expected like "X:0.00" or "Y:170.00" or "Z:120.00" or "E:0.00"
-        auto colon = token.find(':');
-        if (colon == std::string::npos) continue;
-        std::string key = token.substr(0, colon);
-        std::string val = token.substr(colon + 1);
-        try {
-            double v = std::stod(val);
-            if (key == "X") { x = v; gotX = true; }
-            else if (key == "Y") { y = v; gotY = true; }
-            else if (key == "Z") { z = v; gotZ = true; }
-        } catch (...) {
-            // ignore parse errors
+        std::istringstream iss(inside);
+        std::string token;
+        while (iss >> token){
+            auto colon = token.find(':');
+            if (colon == std::string::npos) continue;
+            std::string key = token.substr(0, colon);
+            std::string val = token.substr(colon + 1);
+            try {
+                double v = std::stod(val);
+                if (key == "X") { tx = v; gotX = true; }
+                else if (key == "Y") { ty = v; gotY = true; }
+                else if (key == "Z") { tz = v; gotZ = true; }
+                else if (key == "E") { te = v; gotE = true; }
+            } catch (...) { }
         }
     }
 
-    if (!(gotX || gotY || gotZ)){
-        LOG_ERROR("Robot", "No se pudieron obtener coordenadas de la linea: '" + positionLine + "'");
+    if (!(gotX || gotY || gotZ || gotE)){
+        LOG_DEBUG("Robot", "No se recibieron coordenadas válidas dentro del timeout");
         return false;
     }
 
-    // Actualizar posición (usar 0 para aquellos no recibidos)
     std::lock_guard<std::mutex> plk(positionMutex_);
-    if (gotX) currentPosition_.x = x;
-    if (gotY) currentPosition_.y = y;
-    if (gotZ) currentPosition_.z = z;
+    if (gotX) currentPosition_.x = tx;
+    if (gotY) currentPosition_.y = ty;
+    if (gotZ) currentPosition_.z = tz;
+    if (gotE) currentPosition_.feedrate = te; // usar feedrate para E si no hay campo separado
 
     LOG_DEBUG("Robot", "Posicion actualizada desde M114: X=" + std::to_string(currentPosition_.x)
-              + " Y=" + std::to_string(currentPosition_.y) + " Z=" + std::to_string(currentPosition_.z));
+              + " Y=" + std::to_string(currentPosition_.y) + " Z=" + std::to_string(currentPosition_.z)
+              + " E=" + std::to_string(te));
 
     return true;
 }
