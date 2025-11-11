@@ -65,8 +65,8 @@ bool Robot::sendAndWaitOk(const std::string& line, int timeoutMs){
 
     int elapsed = 0;
     while (elapsed <= timeoutMs) {
-        auto resp = serial_.readLine(500);
-        elapsed += 500;
+        auto resp = serial_.readLine(1000);
+        elapsed += 1000;
         if (resp.empty()) continue;
 
         LOG_DEBUG("Robot", "Respuesta recibida: '" + resp + "' (Elapsed: " + std::to_string(elapsed) + "ms)");
@@ -88,26 +88,34 @@ bool Robot::sendAndWaitOk(const std::string& line, int timeoutMs){
 bool Robot::setMode(bool /*manual*/, bool absolute){
     if (absolute_ != absolute){
         absolute_ = absolute;
-        return sendAndWaitOk(absolute_ ? "G90" : "G91", 15000);
+        bool success=sendAndWaitOk(absolute_ ? "G90" : "G91", 15000);
+        if (learning && success) LearnedGcode << (absolute_ ? "G90" : "G91") << ";\n";
+        return success;
     }
     return true;
 }
 
 bool Robot::enableMotors(bool on){
     motorsOn_ = on;
-    return sendAndWaitOk(on ? "M17" : "M18", 15000);
+    bool success=sendAndWaitOk(absolute_ ? "M17" : "M18", 15000);
+    if (learning && success) LearnedGcode << (absolute_ ? "M90" : "M91") << ";\n";
+    return success;
 }
 
 bool Robot::home(){
-    return sendAndWaitOk("G28", 15000); // homing puede tardar más
+    bool success=sendAndWaitOk("G28", 15000);
+    if (learning && success) LearnedGcode << "G28"<< ";\n";
+    return success;
 }
 
 bool Robot::move(double x, double y, double z, double vel){
     std::ostringstream ss; ss << std::fixed << std::setprecision(3);
+    if (!this->isInWorkspace(x,y,z)) return false;
     ss << "G0 X" << x << " Y" << y << " Z" << z;
     if (vel > 0) ss << " F" << vel;
     
     bool success = sendAndWaitOk(ss.str(), 15000);
+    if (learning && success) LearnedGcode << "G0 X" << x << " Y" << y << " Z" << z << ";\n";
     
     return success;
 }
@@ -115,7 +123,7 @@ bool Robot::move(double x, double y, double z, double vel){
 bool Robot::endEffector(bool on){
     // Ajusta a tu efector real si no es ventilador
     bool success = sendAndWaitOk(on ? "M3" : "M5", 15000);
-    
+    if (learning && success) LearnedGcode << (on ? "M3" : "M5")<< ";\n";
     // Actualizar estado del efector si el tracking está habilitado
     if (success) {
         setEndEffectorState(on);
@@ -126,7 +134,9 @@ bool Robot::endEffector(bool on){
 
 bool Robot::sendGcodeCommand(const std::string& command){
     // Método público para enviar comandos G-code directamente
-    return sendAndWaitOk(command, 15000);
+    bool success = sendAndWaitOk(command, 15000);
+    if (learning && success) LearnedGcode << command << ";\n";
+    return success;
 }
 
 // Implementación de métodos de tracking
@@ -295,6 +305,25 @@ bool Robot::updateCurrentPosition(double x, double y, double z, double feedrate)
     return true;
 }
 
+bool Robot::robotLearning(std::string &routineName,std::string &description){
+    std::lock_guard<std::mutex> lk(positionMutex_);
+    if (learning) {
+        learning=false;
+        LearnedGcode << "M5 ; End effector OFF\n";
+        LearnedGcode << "G28 ; Return to home\n";
+        LearnedGcode << "M18 ; Disable steppers\n";
+
+    }else{
+        learning=true;
+        LearnedGcode.clear();
+        LearnedGcode.str("");
+        LearnedGcode << "; Trayectoria aprendida: " << routineName << "\n";
+        LearnedGcode << "; Generado automáticamente desde modo aprendizaje\n";
+        LearnedGcode << "; Descripción: " << description << "\n\n";
+    } 
+    return learning;
+}
+
 void Robot::setEndEffectorState(bool active) {
     std::lock_guard<std::mutex> lk(positionMutex_);
     currentPosition_.endEffectorActive = active;
@@ -303,6 +332,29 @@ void Robot::setEndEffectorState(bool active) {
 bool Robot::getGripperOn() const {
     std::lock_guard<std::mutex> lk(positionMutex_);
     return currentPosition_.endEffectorActive;
+}
+
+std::string Robot::getLearnedGcode() const {
+    std::lock_guard<std::mutex> lk(positionMutex_);
+    return LearnedGcode.str();
+}
+
+bool Robot::isInWorkspace(double x, double y, double z){
+    double rMax=227.4;
+    double rMin=68.7;
+    double yMin=0;
+    double zMin=-115;
+    double zMax=150;
+    if (x*x+y*y<rMin || x*x+y*y>rMax){
+        return false;
+    }
+    if (z<zMin || z>zMax){
+        return false;
+    }
+    if (y<yMin){
+        return false;
+    }
+    return true;
 }
 
 } // namespace RPCServer
