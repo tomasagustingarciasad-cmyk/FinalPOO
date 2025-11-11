@@ -60,6 +60,8 @@ ServerModel::ServerModel(std::unique_ptr<ServerConfig> config)
     initializeAuthMethods();
 }
 
+ServerModel::~ServerModel() = default;
+
 void ServerModel::start() {
     try {
         XmlRpc::setVerbosity(config_->getVerbosityLevel());

@@ -6,6 +6,7 @@
 #include <string>
 #include "ServerModel.h"
 #include "RPCExceptions.h"
+#include "server/ServerConfig.h"
 
 namespace RPCServer {
 

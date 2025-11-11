@@ -18,7 +18,7 @@ class UserManager;
 class ServerModel {
 public:
     explicit ServerModel(std::unique_ptr<ServerConfig> config);
-    ~ServerModel() = default;
+    ~ServerModel();
 
     void start();
     void run();
