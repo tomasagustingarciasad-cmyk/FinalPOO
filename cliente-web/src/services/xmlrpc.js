@@ -309,6 +309,30 @@ const real = {
     }
   },
 
+  async startLearning(token, routineName, description) {
+    try {
+      return await callMethod("generateGcodeFromMovements", [
+        token,
+        routineName,
+        description || "Rutina aprendida"
+      ]);
+    } catch (err) {
+      throw new Error("Error iniciando aprendizaje: " + err.message);
+    }
+  },
+
+  async stopLearning(token, routineName, description) {
+    try {
+      return await callMethod("generateGcodeFromMovements", [
+        token,
+        routineName,
+        description || "Rutina aprendida"
+      ]);
+    } catch (err) {
+      throw new Error("Error finalizando aprendizaje: " + err.message);
+    }
+  },
+
   // Método genérico para llamadas XML-RPC
   methodCall: callMethod
 };

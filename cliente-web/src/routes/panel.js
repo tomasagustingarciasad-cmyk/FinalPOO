@@ -1,7 +1,7 @@
 import Router from "express-promise-router";
 import { requireLogin } from "../middleware/auth.js";
 import { rpc } from "../services/xmlrpc.js";
-import { logAuth, logSystem, logError } from "../services/logger.js";
+import { logSystem, logError } from "../services/logger.js";
 
 const router = new Router();
 
@@ -11,10 +11,6 @@ router.get("/panel", requireLogin, async (req, res) => {
   try {
     const username = req.session?.user?.username || 'unknown';
     logSystem(req, 'panel_access', `Acceso al panel principal por usuario: ${username}`);
-    
-    console.log("Panel route hit!");
-    console.log("Session:", req.session);
-    console.log("User:", req.session.user);
     
     let status = null;
     let error = null;
@@ -40,24 +36,30 @@ router.get("/panel", requireLogin, async (req, res) => {
       }
     }
     
-    console.log("About to render template");
-
     const moveForm = {
       x: typeof req.query.mx !== 'undefined' ? req.query.mx : '',
       y: typeof req.query.my !== 'undefined' ? req.query.my : '',
       z: typeof req.query.mz !== 'undefined' ? req.query.mz : '',
       feed: typeof req.query.mf !== 'undefined' ? req.query.mf : ''
     };
+
+    const learningActive = !!req.session.learningActive;
+    const learningMeta = req.session.learningMeta || null;
+    const learningRoutineId = req.query.routineId || null;
+    const learningRoutineName = req.query.routineName || null;
     
     res.render("panel/index", { 
       status, 
       error, 
       success,
       user: req.session.user,
-      moveForm
+      moveForm,
+      learningActive,
+      learningMeta,
+      learningRoutineId,
+      learningRoutineName
     });
     
-    console.log("Template rendered successfully");
   } catch (err) {
     console.error("Panel route error:", err);
     res.status(500).send("Error interno: " + err.message);

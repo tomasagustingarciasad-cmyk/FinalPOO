@@ -2,8 +2,8 @@
     <h2>Sign in</h2>
     <% if (error) { %><div class="error"><%= error %></div><% } %>
     <form method="post" action="/login" class="form">
-        <label>Username <input type="text" name="username" required></label>
-        <label>Password <input type="password" name="password" required></label>
+        <label>Username <input class="pass" type="text" name="username" required></label>
+        <label>Password <input class="pass" type="password" name="password" required></label>
         <button type="submit">Login</button>
     </form>
 </section>

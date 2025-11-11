@@ -1,7 +1,7 @@
 import Router from "express-promise-router";
 import { requireLogin } from "../middleware/auth.js";
 import { rpc } from "../services/xmlrpc.js";
-import { logAuth, logSystem, logError } from "../services/logger.js";
+import { logSystem, logError } from "../services/logger.js";
 
 
 const router = new Router();
@@ -63,6 +63,77 @@ router.post("/move", requireLogin, async (req, res) => {
         }
 
         res.status(400).render("robot/move", { result: null, error: e?.message || String(e), last: { x, y, z, feed } });
+    }
+});
+
+
+router.post("/learning/start", requireLogin, async (req, res) => {
+    const username = req.session?.user?.username || 'unknown';
+    const routineNameRaw = (req.body.routineName || '').trim();
+    const descriptionRaw = (req.body.description || '').trim();
+    const routineName = routineNameRaw || `aprendizaje_${Date.now()}`;
+    const description = descriptionRaw || 'Rutina aprendida desde panel';
+
+    if (req.session.learningActive) {
+        return res.redirect("/panel?error=" + encodeURIComponent("El aprendizaje ya se encuentra activo."));
+    }
+
+    try {
+        logSystem(req, 'robot_learning_start', `Inicio de aprendizaje solicitado por ${username}`, `Rutina: ${routineName}`);
+        const result = await rpc.startLearning(req.session.token, routineName, description);
+
+        if (!result?.success) {
+            const message = result?.message || 'No se pudo iniciar el aprendizaje';
+            throw new Error(message);
+        }
+
+        req.session.learningActive = true;
+        req.session.learningMeta = { routineName, description };
+
+        res.redirect("/panel?success=" + encodeURIComponent(result.message || "Aprendizaje activado"));
+    } catch (error) {
+        logError(req, 'robot_learning_start', `Error iniciando aprendizaje por ${username}: ${error.message}`);
+        res.redirect("/panel?error=" + encodeURIComponent("Error iniciando aprendizaje: " + error.message));
+    }
+});
+
+
+router.post("/learning/stop", requireLogin, async (req, res) => {
+    const username = req.session?.user?.username || 'unknown';
+
+    if (!req.session.learningActive) {
+        return res.redirect("/panel?error=" + encodeURIComponent("El aprendizaje no está activo."));
+    }
+
+    const sessionMeta = req.session.learningMeta || {};
+    const routineNameRaw = (req.body.routineName || sessionMeta.routineName || '').trim();
+    const descriptionRaw = (req.body.description || sessionMeta.description || '').trim();
+    const routineName = routineNameRaw || `aprendizaje_${Date.now()}`;
+    const description = descriptionRaw || 'Rutina aprendida desde panel';
+
+    try {
+        logSystem(req, 'robot_learning_stop', `Finalización de aprendizaje solicitada por ${username}`, `Rutina: ${routineName}`);
+        const result = await rpc.stopLearning(req.session.token, routineName, description);
+
+        if (!result?.success) {
+            const message = result?.message || 'No se pudo finalizar el aprendizaje';
+            throw new Error(message);
+        }
+
+        req.session.learningActive = false;
+        req.session.learningMeta = null;
+
+        const params = new URLSearchParams();
+        params.set('success', result.message || `Rutina guardada como ${routineName}.gcode`);
+        if (result.routineId) {
+            params.set('routineId', result.routineId);
+            params.set('routineName', routineName);
+        }
+
+        res.redirect(`/panel?${params.toString()}`);
+    } catch (error) {
+        logError(req, 'robot_learning_stop', `Error finalizando aprendizaje por ${username}: ${error.message}`);
+        res.redirect("/panel?error=" + encodeURIComponent("Error finalizando aprendizaje: " + error.message));
     }
 });
 

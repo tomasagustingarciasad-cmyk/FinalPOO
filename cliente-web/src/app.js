@@ -12,7 +12,6 @@ import authRoutes from "./routes/auth.js";
 import panelRoutes from "./routes/panel.js";
 import robotRoutes from "./routes/robot.js";
 import routinesRoutes from "./routes/routines.js";
-import learningRoutes from "./routes/learning.js";
 import { loggerMiddleware, logSystem } from "./services/logger.js";
 
 
@@ -68,7 +67,6 @@ app.use("/", authRoutes);
 app.use("/", panelRoutes);
 app.use("/robot", robotRoutes);
 app.use("/", routinesRoutes);
-app.use("/learning", learningRoutes);
 
 
 // 404
