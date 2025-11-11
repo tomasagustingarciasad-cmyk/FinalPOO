@@ -345,7 +345,10 @@ bool Robot::isInWorkspace(double x, double y, double z){
     double yMin=0;
     double zMin=-115;
     double zMax=150;
-    if (x*x+y*y<rMin || x*x+y*y>rMax){
+    double radiusSquared = x * x + y * y;
+    double rMinSquared = rMin * rMin;
+    double rMaxSquared = rMax * rMax;
+    if (radiusSquared < rMinSquared || radiusSquared > rMaxSquared){
         return false;
     }
     if (z<zMin || z>zMax){
