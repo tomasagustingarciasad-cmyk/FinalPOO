@@ -106,7 +106,7 @@
                             <% } %>
                         </div>
                     </div>
-                    
+                    <% if (user.role === 'ADMIN') { %>
                     <div class="row mb-3">
                         <div class="col-12">
                             <% if (status && status.connected) { %>
@@ -122,7 +122,7 @@
                             <% } %>
                         </div>
                     </div>
-
+                    <% } %>
                     <div class="row mb-3">
                         <div class="col-12">
                             <form method="post" action="/robot/homing" class="d-inline">
