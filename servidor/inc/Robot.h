@@ -59,5 +59,6 @@ public:
 private:
     bool sendAndWaitOk(const std::string& line, int timeoutMs = 5000);
     std::string readLine(int timeoutMs = 500);
+    bool Robot::isInWorkspace(double x, double y, double z);
 };
 } // namespace RPCServer.
