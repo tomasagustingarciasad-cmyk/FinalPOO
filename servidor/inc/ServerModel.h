@@ -2161,23 +2161,22 @@ class GenerateGcodeFromMovementsMethod : public ServiceMethod {
 private:
     std::shared_ptr<UserManager> userManager_;
     std::shared_ptr<RoutineManager> routineManager_;
+    Robot* robot_;
+    
     
 public:
-    GenerateGcodeFromMovementsMethod(XmlRpc::XmlRpcServer* srv, std::shared_ptr<UserManager> userMgr, std::shared_ptr<RoutineManager> routineMgr)
+    GenerateGcodeFromMovementsMethod(XmlRpc::XmlRpcServer* srv, std::shared_ptr<UserManager> userMgr, std::shared_ptr<RoutineManager> routineMgr, Robot* r)
         : ServiceMethod("generateGcodeFromMovements", "Generar G-code desde movimientos y guardarlo como rutina", srv), 
-          userManager_(userMgr), routineManager_(routineMgr) {}
+          userManager_(userMgr), routineManager_(routineMgr),robot_(r) {}
     
     void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
-        if (params.size() != 4) {
-            throw XmlRpc::XmlRpcException("generateGcodeFromMovements requiere 4 parámetros: token, routineName, description, movements");
+        if (params.size() != 3) {
+            throw XmlRpc::XmlRpcException("generateGcodeFromMovements requiere 4 parámetros: token, routineName, description");
         }
         
         std::string token = static_cast<std::string>(params[0]);
         std::string routineName = static_cast<std::string>(params[1]);
         std::string description = static_cast<std::string>(params[2]);
-        XmlRpc::XmlRpcValue movements = params[3];
-
-        std::cout<<movements<<std::endl;
         
         try {
             // Verificar token
@@ -2194,63 +2193,29 @@ public:
                 return;
             }
             
-            // Generar G-code desde los movimientos
-            std::ostringstream gcode;
-            gcode << "; Trayectoria aprendida: " << routineName << "\n";
-            gcode << "; Generado automáticamente desde modo aprendizaje\n";
-            gcode << "; Descripción: " << description << "\n\n";
-            
-            gcode << "G28 ; Home all axes\n";
-            gcode << "G90 ; Absolute positioning\n";
-            gcode << "G21 ; Units in millimeters\n\n";
-            
-            // Procesar cada movimiento
-            for (int i = 0; i < movements.size(); ++i) {
-                auto move = movements[i];
-                if (move.hasMember("x") && move.hasMember("y") && move.hasMember("z")) {
-                    double x = double(move["x"]);
-                    double y = double(move["y"]);
-                    double z = double(move["z"]);
-                    double feedrate = move.hasMember("feedrate") ? double(move["feedrate"]) : 1000.0;
-                    bool endEffector = move.hasMember("endEffectorActive") ? bool(move["endEffectorActive"]) : false;
-                    
-                    gcode << "; Punto " << (i + 1) << "\n";
-                    gcode << "G1 X" << std::fixed << std::setprecision(3) << x 
-                          << " Y" << y << " Z" << z << " F" << feedrate << "\n";
-                    
-                    // Control del efector final si cambió de estado
-                    if (i == 0 || (i > 0 && bool(movements[i-1]["endEffectorActive"]) != endEffector)) {
-                        gcode << (endEffector ? "M106 ; End effector ON\n" : "M107 ; End effector OFF\n");
-                    }
-                    
-                    if (move.hasMember("notes") && !std::string(move["notes"]).empty()) {
-                        gcode << "; " << std::string(move["notes"]) << "\n";
-                    }
-                    gcode << "\n";
+            bool learning=robot_->robotLearning(routineName,description);
+            if (learning){
+                result["success"] = true;
+                result["message"] = "Aprendizaje Activado";
+            }
+            else{
+                std::string gcodeContent = robot_->getLearnedGcode();
+                
+                // Guardar como rutina en la base de datos
+                std::string filename = routineName + ".gcode";
+                int routineId = routineManager_->createRoutine(filename, filename, description, gcodeContent, currentUser->id);
+                
+                if (routineId > 0) {
+                    result["success"] = true;
+                    result["routineId"] = routineId;
+                    result["filename"] = filename;
+                    result["gcodeContent"] = gcodeContent;
+                    result["message"] = "Trayectoria guardada exitosamente como rutina G-code";
+                } else {
+                    result["success"] = false;
+                    result["message"] = "Error guardando la rutina (posiblemente ya existe)";
                 }
             }
-            
-            gcode << "M107 ; End effector OFF\n";
-            gcode << "G28 ; Return to home\n";
-            gcode << "M18 ; Disable steppers\n";
-            
-            std::string gcodeContent = gcode.str();
-            
-            // Guardar como rutina en la base de datos
-            std::string filename = routineName + ".gcode";
-            int routineId = routineManager_->createRoutine(filename, filename, description, gcodeContent, currentUser->id);
-            
-            if (routineId > 0) {
-                result["success"] = true;
-                result["routineId"] = routineId;
-                result["filename"] = filename;
-                result["gcodeContent"] = gcodeContent;
-                result["message"] = "Trayectoria guardada exitosamente como rutina G-code";
-            } else {
-                result["success"] = false;
-                result["message"] = "Error guardando la rutina (posiblemente ya existe)";
-            }
-            
         } catch (const std::exception& e) {
             result["success"] = false;
             result["message"] = std::string("Error: ") + e.what();
@@ -2281,7 +2246,7 @@ inline void ServerModel::initializeAuthMethods() {
         methods.push_back(std::make_unique<RoutineDeleteMethod>(server.get(), userManager_, routineManager));
         
         // Método para generar G-code desde movimientos aprendidos
-        methods.push_back(std::make_unique<GenerateGcodeFromMovementsMethod>(server.get(), userManager_, routineManager));
+        methods.push_back(std::make_unique<GenerateGcodeFromMovementsMethod>(server.get(), userManager_, routineManager, robot_.get()));
     } catch (const std::exception& e) {
         throw ServerInitializationException("Falló la inicialización de métodos de autenticación: " + std::string(e.what()));
     }

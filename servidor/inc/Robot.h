@@ -20,6 +20,8 @@ class Robot {
     bool absolute_ = true;
     bool motorsOn_ = false;
     std::mutex ioMutex_;
+    bool learning=false;
+    std::ostringstream LearnedGcode;
     
     // Tracking de posición
     Position currentPosition_;
@@ -37,6 +39,7 @@ public:
     bool move(double x, double y, double z, double vel);
     bool endEffector(bool on);
     bool sendGcodeCommand(const std::string& command);
+    bool robotLearning(std::string &routineName,std::string &description);
     
     // Nuevos métodos para tracking de posición
     Position getCurrentPosition() const;
@@ -52,6 +55,7 @@ public:
     // Getters para estado del robot
     bool getMotorsOn() const { return motorsOn_; }
     bool getGripperOn() const; // Se implementa en Robot.cpp
+    std::string getLearnedGcode() const;
 private:
     bool sendAndWaitOk(const std::string& line, int timeoutMs = 5000);
     std::string readLine(int timeoutMs = 500);
