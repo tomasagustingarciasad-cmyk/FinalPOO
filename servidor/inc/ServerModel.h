@@ -738,9 +738,9 @@ public:
         PgConfig cfg;
         cfg.host = "localhost";
         cfg.port = 31432;  // Puerto del Docker
-        cfg.dbname = "finalpoo";
+        cfg.dbname = "poo";
         cfg.user = "postgres";
-        cfg.password = "admin123";
+        cfg.password = "pass123";
         cfg.ssl_disable = true;
         
         try {
@@ -2171,7 +2171,7 @@ public:
     
     void execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) override {
         if (params.size() != 3) {
-            throw XmlRpc::XmlRpcException("generateGcodeFromMovements requiere 4 parámetros: token, routineName, description");
+            throw XmlRpc::XmlRpcException("generateGcodeFromMovements requiere 3 parámetros: token, routineName, description");
         }
         
         std::string token = static_cast<std::string>(params[0]);
@@ -2180,6 +2180,12 @@ public:
         
         try {
             // Verificar token
+            if (!robot_->isConnected()) { 
+                result["success"]=false; 
+                result["message"]="No conectado"; 
+                return; 
+            }
+
             if (!userManager_->validateToken(token)) {
                 result["success"] = false;
                 result["message"] = "Token inválido";
