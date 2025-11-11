@@ -1,4 +1,4 @@
-:root{ --bg:#0f1117; --fg:#e6e6e6; --muted:#9aa4b2; --card:#151822; --accent:#6ea8fe; --danger:#ff6b6b; --ok:#6bff95 }
+:root{ --bg:#f0f2f5; --fg:#1c1e21; --muted:#606770; --card:#ffffff; --accent:#1877f2; --danger:#fa383e; --ok:#52b788 }
 *{ box-sizing:border-box; }
 body{ margin:0; font-family:system-ui,Segoe UI,Roboto,Ubuntu; background:var(--bg); color:var(--fg); }
 .container{ max-width:1080px; margin:0 auto; padding:1rem; }

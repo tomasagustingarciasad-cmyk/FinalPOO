@@ -110,6 +110,7 @@ bool Robot::home(){
 
 bool Robot::move(double x, double y, double z, double vel){
     std::ostringstream ss; ss << std::fixed << std::setprecision(3);
+    if (!this->isInWorkspace(x,y,z)) return false;
     ss << "G0 X" << x << " Y" << y << " Z" << z;
     if (vel > 0) ss << " F" << vel;
     
@@ -336,6 +337,24 @@ bool Robot::getGripperOn() const {
 std::string Robot::getLearnedGcode() const {
     std::lock_guard<std::mutex> lk(positionMutex_);
     return LearnedGcode.str();
+}
+
+bool Robot::isInWorkspace(double x, double y, double z){
+    double rMax=227.4;
+    double rMin=68.7;
+    double yMin=0;
+    double zMin=-115;
+    double zMax=150;
+    if (x*x+y*y<rMin || x*x+y*y>rMax){
+        return false;
+    }
+    if (z<zMin || z>zMax){
+        return false;
+    }
+    if (y<yMin){
+        return false;
+    }
+    return true;
 }
 
 } // namespace RPCServer
