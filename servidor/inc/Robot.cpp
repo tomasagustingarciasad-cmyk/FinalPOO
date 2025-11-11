@@ -308,13 +308,14 @@ bool Robot::robotLearning(std::string &routineName,std::string &description){
     std::lock_guard<std::mutex> lk(positionMutex_);
     if (learning) {
         learning=false;
-        LearnedGcode << "M107 ; End effector OFF\n";
+        LearnedGcode << "M5 ; End effector OFF\n";
         LearnedGcode << "G28 ; Return to home\n";
         LearnedGcode << "M18 ; Disable steppers\n";
 
     }else{
         learning=true;
-        LearnedGcode.flush();
+        LearnedGcode.clear();
+        LearnedGcode.str("");
         LearnedGcode << "; Trayectoria aprendida: " << routineName << "\n";
         LearnedGcode << "; Generado automáticamente desde modo aprendizaje\n";
         LearnedGcode << "; Descripción: " << description << "\n\n";
